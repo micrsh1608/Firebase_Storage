@@ -1,0 +1,22 @@
+// Runnable baseline for member 2. Member 3 owns the final security policy.
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function owner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+    match /users/{uid}/{fileName} {
+      allow get, list: if owner(uid);
+      // Storage 'create' covers writing file contents, including replacement.
+      // resource == null is required to prevent replacing an existing object.
+      allow create: if owner(uid) && resource == null
+        && request.resource.size > 0
+        && request.resource.size <= 5 * 1024 * 1024
+        && request.resource.contentType.matches('(image/(jpeg|png|webp)|application/pdf)');
+      // 'update' is metadata editing; content replacement is guarded above.
+      allow update: if false;
+      // Deletion has no request.resource; keep it separate from size/type checks.
+      allow delete: if owner(uid);
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "firebase-storage-member2-seminar",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "emulators": "firebase emulators:start --only auth,storage --project demo-firebase-storage",
+    "test:policy": "node --test tests/file-policy.test.js",
+    "test:integration": "node --test --test-concurrency=1 tests/emulator.integration.test.js",
+    "test:emulators": "firebase emulators:exec --only auth,storage --project demo-firebase-storage \"npm run test:integration\""
+  },
+  "devDependencies": { "firebase-tools": "15.34.0", "firebase": "13.0.0" }
+}

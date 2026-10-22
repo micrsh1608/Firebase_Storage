@@ -2,34 +2,114 @@
 <html lang="vi">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Student File Hub | Seminar Firebase Storage</title>
-  <style>
-    :root{font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:#13253e;background:#f3f6fc}
-    *{box-sizing:border-box}body{margin:0}header{padding:24px 7%;background:#182e50;color:white}
-    .tag{color:#72e5d0;letter-spacing:.11em;font-size:12px;font-weight:800;text-transform:uppercase}
-    main{max-width:940px;padding:30px 22px;margin:auto}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
-    .card{background:white;border-radius:15px;padding:23px;box-shadow:0 8px 30px #233b6112}.card h2{margin-top:0;font-size:19px}
-    button{cursor:pointer;background:#165ad2;border:0;border-radius:9px;padding:12px 15px;color:white;font-weight:700}
-    button:hover{background:#0d3fa5}code,pre{background:#edf2fb;border-radius:6px;padding:4px 6px}
-    pre{white-space:pre-wrap;padding:12px;min-height:55px;font-size:13px}p{line-height:1.55;color:#4a5b74}
-    footer{max-width:940px;margin:16px auto;padding:0 22px;color:#67748a;font-size:13px}
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#112c36">
+  <title>Student File Hub · FileSpace · Firebase Storage Seminar</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script type="module" src="/static/ui.js"></script>
 </head>
 <body>
-<header><div class="tag">Firebase Storage Workshop • Thành viên 1</div><h1>Student File Hub</h1>
-  <div>Starter app: FastAPI hoạt động ngay cả khi chưa nâng cấp Blaze.</div></header>
-<main><div class="grid">
-  <section class="card"><h2>1. FastAPI hoạt động?</h2><p>Kiểm tra máy chủ Python, không yêu cầu Firebase Storage.</p>
-    <button onclick="check('/api/health','health')">Kiểm tra Backend</button><pre id="health">Chưa kiểm tra</pre></section>
-  <section class="card"><h2>2. Trạng thái cấu hình</h2><p>Xem project đã khai báo chưa và Storage có đang tạm tắt không.</p>
-    <button onclick="check('/api/project-status','project')">Xem cấu hình</button><pre id="project">Chưa kiểm tra</pre></section>
-  <section class="card"><h2>3. Storage (để sau Blaze)</h2><p>Trước khi có Blaze, kết quả <code>pending_blaze</code> là đúng; không phải lỗi.</p>
-    <button onclick="check('/api/storage-check','storage')">Kiểm tra trạng thái</button><pre id="storage">Chưa kiểm tra</pre></section>
-  <section class="card"><h2>4. Phần việc tiếp theo</h2><p>Thành viên 2 bổ sung đăng nhập và CRUD file; Thành viên 3 bổ sung Rules, validation và kiểm thử phân quyền.</p>
-    <a href="/docs">Mở tài liệu REST API (Swagger) →</a></section>
-</div></main><footer>Firebase Storage chưa sử dụng thật cho tới khi tạo bucket Blaze • Không hiển thị service account key trên website.</footer>
-<script>
-async function check(url,id){let el=document.getElementById(id);el.textContent='Đang kiểm tra...';try{let r=await fetch(url);let data=await r.json();el.textContent=JSON.stringify(data,null,2)}catch(e){el.textContent='Không kết nối được: '+e.message}}
-</script>
-</body></html>
+  <a class="skip-link" href="#main">Đến nội dung chính</a>
+  <header class="site-header">
+    <div class="brand" aria-label="FileSpace, Firebase seminar">
+      <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7Z" stroke="currentColor" stroke-width="1.6"/><path d="M12 16V10m-2.5 2.5L12 10l2.5 2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span>FileSpace<span class="brand-sub">FIREBASE STORAGE / SEMINAR</span></span>
+    </div>
+    <div class="environment" aria-live="polite"><span class="status-dot" id="environment-dot"></span><span id="environment-label">Đang kết nối…</span></div>
+  </header>
+
+  <main id="main" class="page-shell">
+    <section class="intro" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">THÀNH VIÊN 02 · AUTHENTICATION & FILE OPERATIONS</p>
+        <h1 id="page-title">Từ đăng nhập<br>đến tệp của bạn.</h1>
+        <p class="intro-copy">Một luồng thực hành hoàn chỉnh với Firebase Authentication và Cloud Storage: tải tệp lên, xem danh sách, lấy liên kết và xóa.</p>
+      </div>
+      <ol class="workflow" aria-label="Quy trình thực hành">
+        <li><span>01</span> Xác thực</li><li><span>02</span> Tải lên</li><li><span>03</span> Chia sẻ</li><li><span>04</span> Quản lý</li>
+      </ol>
+    </section>
+
+    <div class="notice notice-error boot-error" id="boot-error" role="alert" hidden></div>
+    <div class="app-grid">
+      <aside class="sidebar">
+        <section class="panel auth-panel" aria-labelledby="auth-heading">
+          <div class="section-kicker">01 / XÁC THỰC</div>
+          <h2 id="auth-heading">Bắt đầu với tài khoản</h2>
+          <p class="section-copy" id="auth-description">Dùng email và mật khẩu để mở kho tệp theo UID.</p>
+          <div id="signed-out-view">
+            <div class="tabs" role="tablist" aria-label="Hình thức xác thực">
+              <button type="button" id="login-tab" class="tab active" role="tab" aria-selected="true" aria-controls="auth-form" disabled>Đăng nhập</button>
+              <button type="button" id="register-tab" class="tab" role="tab" aria-selected="false" aria-controls="auth-form" disabled>Tạo tài khoản</button>
+            </div>
+            <form id="auth-form" role="tabpanel" aria-labelledby="login-tab">
+              <label for="email">Email</label>
+              <input id="email" name="email" type="email" autocomplete="username" placeholder="ban@example.com" required maxlength="254" disabled>
+              <label for="password">Mật khẩu</label>
+              <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Tối thiểu 6 ký tự" minlength="6" required disabled>
+              <p class="field-hint">Tài khoản demo dùng Email/Password của Firebase Authentication.</p>
+              <button type="submit" id="auth-submit" class="button button-primary button-full" disabled>Đăng nhập <span aria-hidden="true">→</span></button>
+            </form>
+          </div>
+          <div id="signed-in-view" hidden>
+            <div class="account-card">
+              <span class="account-avatar" aria-hidden="true">✓</span>
+              <div><span class="account-state">Đã xác thực</span><strong id="account-email"></strong></div>
+            </div>
+            <dl class="account-details"><dt>USER ID / UID</dt><dd id="account-uid" class="mono"></dd></dl>
+            <button type="button" id="signout-button" class="button button-secondary button-full">Đăng xuất</button>
+          </div>
+          <p class="feedback" id="auth-feedback" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="panel connection-panel" aria-labelledby="connection-heading">
+          <div class="section-kicker">KẾT NỐI</div>
+          <h2 id="connection-heading" class="small-heading">Client → Firebase</h2>
+          <dl class="connection-details"><dt>Project</dt><dd id="project-id" class="mono">—</dd><dt>Storage bucket</dt><dd id="bucket-name" class="mono">—</dd><dt>Vùng tệp hiện tại</dt><dd id="user-prefix" class="mono">Đăng nhập để xem đường dẫn</dd></dl>
+          <div class="divider"></div>
+          <h3>Kiểm tra backend</h3>
+          <p class="section-copy">Gửi ID token đến <code>/api/auth/me</code> để minh họa backend xác thực người dùng.</p>
+          <button type="button" id="verify-button" class="button button-secondary button-full" disabled>Xác thực với API <span aria-hidden="true">↗</span></button>
+          <p class="feedback" id="verify-feedback" role="status" aria-live="polite"></p>
+          <p class="field-hint">Token được gửi trong header; giao diện không hiển thị token.</p>
+        </section>
+        <p class="sidebar-note"><span aria-hidden="true">↳</span> <a href="/setup">Mở trang kiểm tra nền tảng của thành viên 1</a></p>
+      </aside>
+
+      <div class="workspace">
+        <section class="panel upload-panel" aria-labelledby="upload-heading">
+          <div class="panel-heading"><div><div class="section-kicker">02 / TẢI TỆP</div><h2 id="upload-heading">Thêm vào kho tệp</h2></div><span class="format-tag">TỐI ĐA 5 MiB</span></div>
+          <label for="file-input" class="drop-zone" id="drop-zone" aria-disabled="true">
+            <span class="upload-icon" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M16 21V7m-5 5 5-5 5 5M7 20v5a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <strong id="drop-title">Đăng nhập để tải tệp lên</strong><span id="drop-description">Kéo thả hoặc <span class="text-link">chọn tệp từ máy</span></span><small>JPEG, PNG, WEBP hoặc PDF · Mỗi lần một tệp</small>
+            <input id="file-input" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" disabled>
+          </label>
+          <div class="selected-file" id="selected-file" hidden><span class="file-symbol" aria-hidden="true">↗</span><div><strong id="selected-name"></strong><span id="selected-meta"></span></div><button type="button" id="clear-file" class="icon-button" aria-label="Bỏ chọn tệp">×</button></div>
+          <div class="upload-actions"><p id="upload-help" class="field-hint">Tệp được lưu theo đường dẫn <code>users/{uid}/…</code>.</p><button type="button" id="upload-button" class="button button-primary" disabled>Tải tệp lên <span aria-hidden="true">↑</span></button></div>
+          <div class="upload-progress" id="upload-progress" hidden><div class="progress-heading"><span id="progress-label">Đang tải lên…</span><button type="button" id="cancel-upload" class="text-button">Hủy tải</button></div><progress id="progress-bar" max="100" value="0" aria-label="Tiến độ tải tệp lên"></progress></div>
+          <p class="feedback" id="upload-feedback" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="panel files-panel" aria-labelledby="files-heading">
+          <div class="panel-heading"><div><div class="section-kicker">03 / QUẢN LÝ</div><h2 id="files-heading">Tệp của bạn <span class="count" id="file-count">0</span></h2></div><button type="button" id="refresh-button" class="button button-quiet" disabled><span aria-hidden="true">↻</span> Làm mới</button></div>
+          <p class="files-subtitle">File reference là đường dẫn trong bucket. Lấy URL khi bạn muốn tải hoặc chia sẻ tệp.</p>
+          <div class="empty-state" id="files-empty"><span class="empty-art" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none"><path d="M12 22a4 4 0 0 1 4-4h14l5 5h13a4 4 0 0 1 4 4v22a4 4 0 0 1-4 4H16a4 4 0 0 1-4-4V22Z" fill="#e6efeb" stroke="#64827b" stroke-width="1.4"/><path d="M24 13h18l8 8v19H24V13Z" fill="#fbfaf5" stroke="#64827b" stroke-width="1.4"/><path d="M42 13v8h8M30 27h13M30 33h9" stroke="#64827b" stroke-width="1.4" stroke-linecap="round"/></svg></span><h3 id="empty-title">Kho tệp đang chờ bạn</h3><p id="empty-description">Đăng nhập để xem và quản lý tệp của tài khoản.</p></div>
+          <div class="table-wrap" id="files-table-wrap" hidden><table><thead><tr><th scope="col">Tệp / Đường dẫn</th><th scope="col">Thông tin</th><th scope="col"><span class="sr-only">Thao tác</span></th></tr></thead><tbody id="files-body"></tbody></table></div>
+          <div class="pagination" id="pagination" hidden><span id="page-label">Trang 1</span><div><button type="button" id="previous-page" class="button button-quiet" disabled>← Trước</button><button type="button" id="next-page" class="button button-quiet" disabled>Tiếp →</button></div></div>
+          <p class="feedback file-feedback" id="files-feedback" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="panel url-panel" aria-labelledby="url-heading">
+          <div class="panel-heading"><div><div class="section-kicker">04 / DOWNLOAD URL</div><h2 id="url-heading">Một liên kết, một tệp</h2></div><span class="link-icon" aria-hidden="true">↗</span></div>
+          <p class="section-copy">Chọn “Lấy URL” ở một tệp để tạo liên kết tải xuống.</p>
+          <div class="url-result" id="url-result" hidden><label for="download-url" id="url-filename">Liên kết tải xuống</label><textarea id="download-url" rows="3" readonly spellcheck="false"></textarea><div class="url-actions"><button type="button" id="copy-url" class="button button-secondary">Sao chép URL</button><a id="open-url" class="button button-primary" target="_blank" rel="noopener noreferrer">Mở tệp <span aria-hidden="true">↗</span></a><button type="button" id="clear-url" class="text-button">Ẩn liên kết</button></div></div>
+          <div class="notice notice-warning"><span aria-hidden="true">!</span><p>Download URL có token là <strong>liên kết chia sẻ</strong>: ai có URL cũng có thể truy cập tệp. Chỉ chia sẻ có chủ đích; đăng xuất không thu hồi URL đã cấp.</p></div>
+          <p class="feedback" id="url-feedback" role="status" aria-live="polite"></p>
+        </section>
+      </div>
+    </div>
+    <footer><span>FILESPACE / FIREBASE STORAGE</span><span>Đăng nhập → Tải lên → Tải xuống → Xóa</span></footer>
+  </main>
+</body>
+</html>

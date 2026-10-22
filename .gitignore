@@ -7,12 +7,19 @@ __pycache__/
 # Environment variables
 .env
 .env.local
+.env.*.local
 
 # Firebase service account
 secrets/*.json
 serviceAccountKey.json
 *firebase-adminsdk*.json
+*service-account*.json
 
 # Other
 .vscode/
 *.log
+
+# Firebase CLI / JavaScript packages (member 2 local demo)
+node_modules/
+.firebase/
+firebase-export-*/
