@@ -1,18 +1,31 @@
-# Python
-.venv/
-__pycache__/
-*.pyc
-.pytest_cache/
-
-# Environment variables
+# Credentials and local settings: NEVER commit
 .env
-.env.local
-
-# Firebase service account
+.env.*
+!.env.example
 secrets/*.json
-serviceAccountKey.json
-*firebase-adminsdk*.json
+**/*serviceAccount*.json
+**/*firebase-adminsdk*.json
+*.pem
+*.p12
+*.pfx
 
-# Other
+# Dependencies and local artifacts
+.venv/
+venv/
+node_modules/
+.runtime/
+.data/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+coverage/
+dist/
+build/
+*.egg-info/
 .vscode/
+.idea/
+.DS_Store
 *.log
+firebase-debug.log
+ui-debug.log

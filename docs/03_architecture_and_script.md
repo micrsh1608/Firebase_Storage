@@ -33,7 +33,7 @@ hình Firebase Authentication/Web App.
   Enabled; nói rõ Storage còn chờ Blaze (không tuyên bố đã tạo bucket).
 - **09:00–12:00 – Hands-on:** chạy `uvicorn`, mở giao diện, /docs và /api/health.
 - **12:00–14:00 – Checkpoint:** người nghe gọi /api/health, /api/project-status,
-  giải thích Storage hiện pending_blaze; giới thiệu phần thực hành CRUD của TV2.
+  giải thích `/api/storage-check` trả `ok` khi Cloud Admin đã kết nối, `emulator` khi thử cục bộ; giới thiệu Auth và CRUD của TV2.
 
 ## Các câu vấn đáp thường gặp
 Q: Firebase Storage giải quyết bài toán kinh doanh gì?

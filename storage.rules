@@ -1,0 +1,14 @@
+
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // All file operations go through the authenticated FastAPI gateway.
+    // Allowing even owner uploads here would bypass the aggregate account quota.
+    // The gateway verifies Firebase ID tokens and derives the owner from claims.
+    // Admin SDK access is controlled by IAM, not these client rules.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

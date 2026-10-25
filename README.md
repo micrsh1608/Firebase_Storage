@@ -1,163 +1,105 @@
-# Student File Hub — Firebase Storage Seminar
+# FileSpace — đợt 3
 
-> **Thành viên 1 — Firebase Setup, Architecture & Python FastAPI**  
-> Dự án seminar: **Firebase Storage — File Storage, Download URLs, Security Rules**  
-> Firebase Project ID: **`student-file-hub-seminar-7a7f2`**
+Ứng dụng lưu trữ và chia sẻ tài liệu dùng FastAPI, Firebase Authentication và Cloud Storage. Bản 1.3.1 hoàn thiện thư mục, đổi tên/di chuyển, tìm kiếm toàn bộ danh sách, xem trước và khôi phục mật khẩu trên nền đợt 2.
 
-## 1. Giới thiệu
+## Đã hoàn thiện
 
-**Student File Hub** là ứng dụng minh họa cách kết nối dịch vụ lưu trữ file **Cloud Storage for Firebase** với backend **Python FastAPI**. Đây là bộ mã nguồn nền tảng do Thành viên 1 chuẩn bị để cả nhóm phát triển tiếp chức năng đăng nhập, tải file lên/xuống, xóa file và phân quyền.
+- Thư mục nhiều cấp, breadcrumb, tạo/đổi tên/di chuyển và xóa thư mục rỗng. Tối đa 100 thư mục/tài khoản, 10 cấp; chặn vòng lặp, trùng tên thư mục cùng cấp và truy cập thư mục người khác.
+- Đổi tên và di chuyển file giữ nguyên ID, nội dung, dung lượng và quyền chia sẻ. Thư mục tổ chức tài liệu; quyền được cấp riêng từng file.
+- Tìm theo tên trên toàn bộ tài liệu của tôi, gồm mọi thư mục khi có từ khóa. Mục được chia sẻ và thùng rác cũng tìm trên toàn bộ danh sách được phép truy cập.
+- Lọc PDF/ảnh và sắp xếp tên/ngày/dung lượng tại server trước khi phân trang 20 file. Cursor gắn với tài khoản, danh sách và bộ lọc.
+- Xem trước PDF từng trang bằng PDF.js được đóng gói cục bộ; xem ảnh bằng blob riêng tư. Mọi lượt lấy nội dung kiểm tra lại quyền; đóng/chuyển phiên sẽ giải phóng bản xem trước.
+- Quên mật khẩu: gửi hướng dẫn qua Firebase Authentication, thông báo chung cho email đã/chưa đăng ký. Demo emulator không gửi email thật.
+- Giữ chia sẻ theo email đã đăng ký, thu hồi, thùng rác, khôi phục riêng tư và xóa vĩnh viễn. Người nhận chỉ xem/tải.
+- Giữ giới hạn 10 MiB/file, 50 MiB và 200 file/tài khoản; thùng rác vẫn tính quota; tối đa 20 người nhận/file.
 
-Ứng dụng hiện có:
+## Chạy demo cục bộ
 
-- Trang chủ demo tại `GET /`.
-- API kiểm tra backend: `GET /api/health`.
-- API xem trạng thái cấu hình: `GET /api/project-status`.
-- API **kiểm tra truy cập Storage Bucket thật**: `GET /api/storage-check`.
-- Swagger UI tại `GET /docs` và bài kiểm thử với `pytest`.
+Yêu cầu Python 3.11+, Node.js 24.12+, npm và JDK tương thích Firebase CLI (đã kiểm thử JDK 24). Trình duyệt cần internet để tải Firebase Web SDK; Auth/file chạy trong emulator cục bộ, không cần billing hay service account.
 
-**Phạm vi hiện tại:** API `storage-check` chứng minh backend truy cập được bucket qua **Firebase Admin SDK**; mã nguồn Thành viên 1 **chưa triển khai** đăng nhập, upload/download/delete file hoặc kiểm thử Security Rules từ client. Các chức năng đó được tích hợp bởi Thành viên 2 và Thành viên 3.
-
-## 2. Công nghệ
-
-| Thành phần | Vai trò |
-|---|---|
-| Python 3.11+ | Ngôn ngữ backend |
-| FastAPI, Uvicorn | REST API và máy chủ phát triển |
-| Firebase Admin SDK for Python | Xác thực backend và truy cập Cloud Storage |
-| Cloud Storage for Firebase | Lưu trữ file trên cloud |
-| Firebase Authentication | Dịch vụ tài khoản; giao diện đăng nhập do TV2 triển khai |
-| Firebase Storage Security Rules | Phân quyền thao tác Web/Mobile SDK; TV3 triển khai |
-| python-dotenv | Đọc biến môi trường từ `.env` |
-| pytest, httpx | Kiểm thử tự động |
-
-## 3. Cấu trúc thư mục
-
-```text
-firebase_member1_no_blaze/
-├── app/
-│   ├── __init__.py
-│   ├── main.py                   # FastAPI, HTTP routes
-│   └── firebase_client.py        # Cấu hình và kiểm tra Storage qua Admin SDK
-├── frontend/
-│   ├── index.html                # Trang kiểm tra API
-│   ├── firebase-config.example.js
-│   └── firebase-config.js       # Tạo từ cấu hình Web App mới (nếu dùng)
-├── docs/
-│   ├── setup.md                  # Hướng dẫn chuẩn để cài, chạy và test
-│   └── ...                       # Tài liệu seminar khác
-├── secrets/
-│   └── serviceAccountKey.json    # KHÔNG commit hoặc chia sẻ
-├── tests/
-│   └── test_main.py
-├── .env                          # Cấu hình chạy local, KHÔNG commit
-├── .env.example                  # File mẫu có thể chia sẻ
-├── .gitignore
-├── requirements.txt
-└── README.md
-```
-
-> Tên thư mục hiện vẫn là `firebase_member1_no_blaze` vì kế thừa Starter Project; **không có nghĩa project hiện tại chưa dùng Blaze**. Đừng đổi tên tùy tiện nếu nhóm đang dùng cấu trúc này để tích hợp code.
-
-## 4. Yêu cầu trước khi chạy
-
-1. Máy Windows có **Python 3.11+**, VS Code và Internet.
-2. Firebase project **`student-file-hub-seminar-7a7f2`** đã bật Blaze; có Storage Bucket **`student-file-hub-seminar-7a7f2.firebasestorage.app`** (phải đối chiếu tên thật trong Firebase Console → Storage → Files).
-3. Backend có file Service Account **của chính project mới**, được cấp quyền truy cập bucket.
-4. Tài khoản Firebase Authentication Email/Password đã được bật nếu nhóm cần thực hành phần đăng nhập sau này.
-
-## 5. Chạy nhanh trên Windows PowerShell
-
-Mở thư mục gốc dự án trong VS Code → **Terminal → New Terminal**.
-
-```powershell
-py --version
-py -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+~~~powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+npm ci
 Copy-Item .env.example .env
-```
+~~~
 
-> Nếu đã có `.env` với cấu hình đúng, **không thực hiện lại** lệnh `Copy-Item` để tránh ghi đè ngoài ý muốn.
+Giữ DEMO_MODE=emulator và FIREBASE_PROJECT_ID=demo-firebase-storage. Không ghi đè .env đang có khi nâng cấp một cấu hình đã hoạt động.
 
-Đặt Service Account JSON trong `secrets/serviceAccountKey.json`. Mở `.env` và sửa như sau:
+Terminal 1:
 
-```dotenv
-FIREBASE_PROJECT_ID=student-file-hub-seminar-7a7f2
-STORAGE_ENABLED=true
-FIREBASE_STORAGE_BUCKET=student-file-hub-seminar-7a7f2.firebasestorage.app
-GOOGLE_APPLICATION_CREDENTIALS=secrets/serviceAccountKey.json
-```
+~~~powershell
+npm run emulators
+~~~
 
-**Không đưa dấu `gs://` vào tên `FIREBASE_STORAGE_BUCKET`.** Lưu `.env`, sau đó chạy:
+Terminal 2:
 
-```powershell
-.\.venv\Scripts\python.exe -m uvicorn app.main:app --reload
-```
+~~~powershell
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8011
+~~~
 
-Mở:
+Mở **http://127.0.0.1:8011/**; /setup kiểm tra hệ thống, /docs là API, http://127.0.0.1:4000/ là Emulator UI. Dừng bằng Ctrl+C. Nếu java không chạy được, thêm bin của JDK vào PATH.
 
-- **Trang chủ:** http://127.0.0.1:8000/
-- **Swagger UI:** http://127.0.0.1:8000/docs
-- **Health:** http://127.0.0.1:8000/api/health
-- **Project status:** http://127.0.0.1:8000/api/project-status
-- **Storage check:** http://127.0.0.1:8000/api/storage-check
+Auth/Storage Emulator mặc định mất dữ liệu khi tắt. Nếu cần giữ demo, cấu hình import/export của Emulator Suite và giữ .data tương ứng.
 
-> `STORAGE_ENABLED=true` chỉ bật luồng kiểm tra Storage trong ứng dụng. Storage Bucket phải tồn tại trên Firebase từ trước; không phải chỉ sửa `.env` là tạo được bucket.
+## Nâng cấp từ đợt 2
 
-## 6. Kết quả API mong đợi
+1. Dừng server, sao lưu thư mục .data cùng dữ liệu Storage; giữ .env và credential của chính bạn.
+2. Cập nhật source và chạy npm ci. Các tài nguyên PDF.js cần thiết đã có trong frontend/vendor/pdfjs.
+3. Khởi động server. Schema SQLite tự bổ sung tên hiển thị, vị trí file và bảng thư mục trong giao dịch; giữ trạng thái thùng rác và quyền chia sẻ hiện có.
+4. File cũ tự xuất hiện tại thư mục gốc. Raw Storage path không thay đổi khi đổi tên/di chuyển.
 
-| Endpoint | HTTP | Nội dung cần kiểm tra |
-|---|---:|---|
-| `GET /api/health` | `200` | `status: "ok"` |
-| `GET /api/project-status` | `200` | Đúng Project ID; `firebase_project_configured: true`, `storage_enabled: true`, `storage_configured: true` |
-| `GET /api/storage-check` | `200` | `status: "ok"`, `bucket: "student-file-hub-seminar-7a7f2.firebasestorage.app"` |
-| `GET /docs` | `200` | Hiển thị Swagger UI và các endpoint |
+**Giữ project/.data/** hoặc FILESPACE_DATA_DIR khi nâng cấp. Đây là dữ liệu quyền chia sẻ, thùng rác, tên và thư mục, không phải cache. Các worker cần cùng thư mục metadata và .runtime/file-locks trên một server/filesystem hỗ trợ SQLite. Nhiều server độc lập cần khóa/giao dịch phân tán.
 
-Ví dụ kết quả **sau khi kết nối Storage thật thành công**:
+## Sử dụng
 
-```json
-{
-  "status": "ok",
-  "bucket": "student-file-hub-seminar-7a7f2.firebasestorage.app",
-  "message": "Kết nối Cloud Storage thành công."
-}
-```
+- Chọn Tài liệu của tôi → Tạo thư mục → mở thư mục để upload vào đó.
+- Đổi tên hoặc Di chuyển cạnh file; hộp di chuyển có Thư mục gốc và đường dẫn thư mục đích.
+- Gõ từ khóa để tìm xuyên mọi thư mục; xóa từ khóa để quay về thư mục đang mở. Chọn loại file và thứ tự trước khi sang trang tiếp theo.
+- Chọn Xem trước để đọc PDF/ảnh bằng quyền hiện tại; PDF có nút trang trước/sau và tải xuống.
+- Chia sẻ cho email tài khoản B; B mở Được chia sẻ với tôi. Đổi tên/di chuyển vẫn giữ grant. Trash thu hồi mọi grant; restore luôn riêng tư.
+- Chỉ xóa được thư mục không có thư mục con hoặc file, kể cả file còn trong thùng rác.
+- Ở trang đăng nhập, chọn Quên mật khẩu?. Cloud gửi email thật; emulator tạo thao tác cục bộ, có thể kiểm tra qua Auth Emulator.
 
-`/api/project-status` chỉ kiểm tra **giá trị cấu hình**, không xác minh Authentication. `/api/storage-check` mới thực hiện yêu cầu kiểm tra bucket thật khi Storage được bật.
+Thùng rác chưa tự dọn theo ngày. Thu hồi quyền chặn lượt lấy dữ liệu mới, không thu hồi bản đã tải/xem trước hoặc lượt tải được cho phép trước đó.
 
-## 7. Kiểm thử tự động
+## Kiểm thử và tài nguyên PDF
 
-Trong Terminal thứ hai (hoặc dừng Uvicorn bằng `Ctrl+C`):
-
-```powershell
+~~~powershell
 .\.venv\Scripts\python.exe -m pytest -q
-```
+npm test
+npm run test:emulators
+~~~
 
-Bộ test hiện có gồm 4 trường hợp: `health`, trang chủ, trạng thái cấu hình, và hành vi an toàn khi **tắt Storage**. **4 test pass không thay thế phép thử kết nối Blaze thật**; để xác nhận kết nối phải gọi `/api/storage-check` với `STORAGE_ENABLED=true`.
+Dừng emulator khác trước test:emulators vì lệnh tự khởi động/dừng dịch vụ. Integration chọn Python trong .venv; có thể đặt FILESPACE_TEST_PYTHON.
 
-## 8. Kiến trúc và trách nhiệm
+PDF.js 6.4.299 được khóa phiên bản, có LICENSE và tài nguyên worker/font/CMap/WASM trong frontend/vendor/pdfjs. Khi tái tạo tài nguyên sau npm ci:
 
-```text
-Trình duyệt ──HTTP──> Python FastAPI ──Firebase Admin SDK──> Storage Bucket
-     │
-     └── Firebase Web SDK ──Authentication / Storage Rules──> Firebase services
-         (TV2 + TV3 tích hợp sau)
-```
+~~~powershell
+npm run vendor:pdf
+~~~
 
-- **TV1:** Firebase Project, bucket, cấu hình backend, FastAPI, kiểm tra kết nối, tài liệu setup, kiến trúc.
-- **TV2:** Firebase Web SDK, đăng ký/đăng nhập, file upload, download URL, danh sách và xóa file.
-- **TV3:** Storage Rules, kiểm thử phân quyền, bảo mật API và ví dụ tích hợp microservice.
+Bộ xem chỉ dựng canvas, không chạy PDF scripts, biểu mẫu hoặc liên kết tương tác. PDF hỏng/được bảo vệ mật khẩu có thể cần tải về và mở bằng công cụ phù hợp. Xem [tài liệu PDF.js chính thức](https://mozilla.github.io/pdf.js/examples/).
 
-**Quan trọng về bảo mật:** Firebase Admin SDK là SDK có đặc quyền phía server và **không bị Firebase Storage Security Rules kiểm soát như các client SDK**. Khi nhóm thêm API thao tác file bằng Admin SDK, backend phải **xác minh ID Token và tự kiểm tra quyền sở hữu file** trước khi đọc/ghi/xóa.
+Xem [kết quả kiểm thử](docs/verification.md) và [quy tắc/API](docs/file-operations.md).
 
-## 9. Bảo mật và chi phí
+## Cloud và phạm vi vận hành
 
-- **Tuyệt đối không commit** `secrets/serviceAccountKey.json` hoặc `.env` lên GitHub; kiểm tra `.gitignore` và `git status` trước khi push.
-- Không nhúng service account vào `frontend/` hoặc slide.
-- Cấu hình Firebase Web App (`apiKey`, `appId`, ...) **không phải** khóa Admin; tuy nhiên phải cấu hình Authentication/Rules đúng.
-- Project ở gói **Blaze** có thể phát sinh chi phí. Theo dõi Storage usage và tạo **Billing Budget Alert**; cảnh báo ngân sách thông thường **không phải giới hạn chi tiêu cứng**.
-- Storage Rules khởi tạo theo Production Mode có thể chặn Web SDK upload/download; TV3 cần thay bằng Rules an toàn và kiểm thử trước demo.
+Cloud cần Web config của chính bạn, Email/Password, Admin credential qua ADC hoặc GOOGLE_APPLICATION_CREDENTIALS, bucket riêng tư và storage.rules deny-all đã publish vào đúng project. Cả owner/recipient dùng API; browser không thao tác Storage trực tiếp.
 
-## 10. Tài liệu chi tiết
+Email xác minh được gửi tự động khi đăng ký. Người dùng chỉ cần mở liên kết trong email; FileSpace tự kiểm tra khi tab đang hiển thị (mỗi 5 giây), khi quay lại tab hoặc có mạng, rồi làm mới token trước khi báo thành công. Không còn nút “Tôi đã xác minh”. Nút gửi lại có thời gian chờ 60 giây; lỗi gửi không làm mất tài khoản đã tạo. Backend Cloud vẫn kiểm tra trạng thái từ Firebase Admin. Emulator tạo email/OOB cục bộ để demo, không gửi email thật.
 
-Đọc **[`docs/setup.md`](docs/setup.md)** để thực hiện từng bước: tạo/cấu hình Firebase, chuẩn bị Service Account, chạy FastAPI, dùng Swagger, chạy tests và xử lý lỗi thường gặp.
+Với URL token từ bản cũ, kiểm tra/thu hồi trước khi coi file cũ là riêng tư:
+
+~~~powershell
+.\.venv\Scripts\python.exe -m scripts.revoke_legacy_tokens
+.\.venv\Scripts\python.exe -m scripts.revoke_legacy_tokens --apply --project YOUR_PROJECT_ID
+~~~
+
+Cloud Storage yêu cầu Blaze/Cloud Billing; mức miễn phí không phải cam kết hóa đơn 0 đồng. [Thông báo Firebase](https://firebase.google.com/docs/storage/faqs-storage-changes-announced-sept-2024). Bản này chưa deploy hoặc kiểm thử bucket/email Cloud thật.
+
+Hạn mức hiện phục vụ một server/demo. Chưa có rate limit, quét virus, chia sẻ thư mục, public link, OCR/tìm nội dung tài liệu hoặc đồng bộ máy tính. Upload hủy/timeout sau khi server nhận xong có thể vẫn lưu thành công; làm mới trước khi thử lại.
+
+Các tài liệu seminar TV1/TV2 khác trong docs là lịch sử; README, docs/file-operations.md và docs/verification.md là tài liệu chuẩn cho đợt 3.
+
+

@@ -2,34 +2,456 @@
 <html lang="vi">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Student File Hub | Seminar Firebase Storage</title>
-  <style>
-    :root{font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:#13253e;background:#f3f6fc}
-    *{box-sizing:border-box}body{margin:0}header{padding:24px 7%;background:#182e50;color:white}
-    .tag{color:#72e5d0;letter-spacing:.11em;font-size:12px;font-weight:800;text-transform:uppercase}
-    main{max-width:940px;padding:30px 22px;margin:auto}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
-    .card{background:white;border-radius:15px;padding:23px;box-shadow:0 8px 30px #233b6112}.card h2{margin-top:0;font-size:19px}
-    button{cursor:pointer;background:#165ad2;border:0;border-radius:9px;padding:12px 15px;color:white;font-weight:700}
-    button:hover{background:#0d3fa5}code,pre{background:#edf2fb;border-radius:6px;padding:4px 6px}
-    pre{white-space:pre-wrap;padding:12px;min-height:55px;font-size:13px}p{line-height:1.55;color:#4a5b74}
-    footer{max-width:940px;margin:16px auto;padding:0 22px;color:#67748a;font-size:13px}
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="rgb(27,42,85)">
+  <meta name="description" content="FileSpace - Quản lý thư mục, tìm kiếm, xem trước và chia sẻ tài liệu theo tài khoản.">
+  <title>FileSpace · Kho tài liệu của tôi</title>
+  <link rel="stylesheet" href="/static/styles.css?v=filespace-auto-verification-1">
+  <script type="module" src="/static/ui.js?v=filespace-auto-verification-1"></script>
 </head>
 <body>
-<header><div class="tag">Firebase Storage Workshop • Thành viên 1</div><h1>Student File Hub</h1>
-  <div>Starter app: FastAPI hoạt động ngay cả khi chưa nâng cấp Blaze.</div></header>
-<main><div class="grid">
-  <section class="card"><h2>1. FastAPI hoạt động?</h2><p>Kiểm tra máy chủ Python, không yêu cầu Firebase Storage.</p>
-    <button onclick="check('/api/health','health')">Kiểm tra Backend</button><pre id="health">Chưa kiểm tra</pre></section>
-  <section class="card"><h2>2. Trạng thái cấu hình</h2><p>Xem project đã khai báo chưa và Storage có đang tạm tắt không.</p>
-    <button onclick="check('/api/project-status','project')">Xem cấu hình</button><pre id="project">Chưa kiểm tra</pre></section>
-  <section class="card"><h2>3. Storage (để sau Blaze)</h2><p>Trước khi có Blaze, kết quả <code>pending_blaze</code> là đúng; không phải lỗi.</p>
-    <button onclick="check('/api/storage-check','storage')">Kiểm tra trạng thái</button><pre id="storage">Chưa kiểm tra</pre></section>
-  <section class="card"><h2>4. Phần việc tiếp theo</h2><p>Thành viên 2 bổ sung đăng nhập và CRUD file; Thành viên 3 bổ sung Rules, validation và kiểm thử phân quyền.</p>
-    <a href="/docs">Mở tài liệu REST API (Swagger) →</a></section>
-</div></main><footer>Firebase Storage chưa sử dụng thật cho tới khi tạo bucket Blaze • Không hiển thị service account key trên website.</footer>
-<script>
-async function check(url,id){let el=document.getElementById(id);el.textContent='Đang kiểm tra...';try{let r=await fetch(url);let data=await r.json();el.textContent=JSON.stringify(data,null,2)}catch(e){el.textContent='Không kết nối được: '+e.message}}
-</script>
-</body></html>
+  <svg class="svg-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+    <symbol id="ic-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></symbol>
+    <symbol id="ic-files" viewBox="0 0 24 24"><path d="M8 3h7l5 5v12a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M15 3v6h5M4 7v13M11 13h5M11 17h5"/></symbol>
+    <symbol id="ic-upload" viewBox="0 0 24 24"><path d="M12 16V3m-5 5 5-5 5 5M4 16v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></symbol>
+    <symbol id="ic-link" viewBox="0 0 24 24"><path d="m10 13 4-4M8 16H6a4 4 0 0 1 0-8h5M16 8h2a4 4 0 0 1 0 8h-5"/></symbol>
+    <symbol id="ic-shield" viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5 3 8.5 8 11 5-2.5 8-6 8-11V5l-8-3Z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="ic-search" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="7"/><path d="m16 16 5 5"/></symbol>
+    <symbol id="ic-refresh" viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.5 9a7 7 0 0 1 12-2l2.5 5M4 12l2.5 5a7 7 0 0 0 12-2"/></symbol>
+    <symbol id="ic-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+    <symbol id="ic-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="ic-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/></symbol>
+    <symbol id="ic-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="ic-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol>
+    <symbol id="ic-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 4h4m-8 3 1 14h10l1-14M10 11v6m4-6v6"/></symbol>
+    <symbol id="ic-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></symbol>
+    <symbol id="ic-logout" viewBox="0 0 24 24"><path d="M9 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4M14 7l5 5-5 5m5-5H9"/></symbol>
+    <symbol id="ic-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 11v6m0-10v1"/></symbol>
+    <symbol id="ic-chevron" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></symbol>
+    <symbol id="ic-external" viewBox="0 0 24 24"><path d="M13 5h6v6m0-6-9 9M19 14v5H5V5h5"/></symbol>
+    <symbol id="ic-x" viewBox="0 0 24 24"><path d="M5 5 19 19M19 5 5 19"/></symbol>
+    <symbol id="ic-star" viewBox="0 0 24 24"><polygon points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3 12 2"/></symbol>
+    <symbol id="ic-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+    <symbol id="ic-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5 8.6 10.5"/></symbol>
+    <symbol id="ic-list" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></symbol>
+    <symbol id="ic-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></symbol>
+    <symbol id="ic-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="ic-cloud" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10Z"/></symbol>
+    <symbol id="ic-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="ic-delete" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></symbol>
+  </svg>
+
+  <a class="skip-link" href="#main">Đến nội dung chính</a>
+
+  <div class="app-shell">
+    <!-- Sidebar -->
+    <aside class="app-sidebar" aria-label="Điều hướng chính">
+      <!-- Brand -->
+      <a class="brand" href="#dashboard" aria-label="FileSpace - Trang tổng quan">
+        <span class="brand-mark">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="brand-text">FileSpace</span>
+      </a>
+
+      <!-- Navigation -->
+      <nav class="main-nav" aria-label="Các mục ứng dụng">
+        <a class="nav-item active" href="#file-library" id="nav-allfiles" data-library-view="own">
+          <svg class="icon" aria-hidden="true"><use href="#ic-folder"/></svg>Tài liệu của tôi
+        </a>
+        <a class="nav-item" href="#file-library" data-library-view="shared">
+          <svg class="icon" aria-hidden="true"><use href="#ic-share"/></svg>Được chia sẻ với tôi
+        </a>
+        <a class="nav-item" href="#file-library" data-library-view="trash">
+          <svg class="icon" aria-hidden="true"><use href="#ic-trash"/></svg>Thùng rác
+        </a>
+        <a class="nav-item" href="#upload-area">
+          <svg class="icon" aria-hidden="true"><use href="#ic-upload"/></svg>Tải tài liệu lên
+        </a>
+        <a class="nav-item" href="#download-area">
+          <svg class="icon" aria-hidden="true"><use href="#ic-arrow"/></svg>Tải xuống riêng tư
+        </a>
+        <a class="nav-item" href="#auth-section">
+          <svg class="icon" aria-hidden="true"><use href="#ic-user"/></svg>Tài khoản
+        </a>
+        <a class="nav-item" href="/setup">
+          <svg class="icon" aria-hidden="true"><use href="#ic-settings"/></svg>Kiểm tra hệ thống
+        </a>
+      </nav>
+
+      <!-- Create new button -->
+      <div class="sidebar-bottom">
+        <button type="button" id="create-new-btn" class="btn-create-new">
+          <svg class="icon" aria-hidden="true"><use href="#ic-plus"/></svg>
+          Tải tệp mới
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main area -->
+    <div class="app-main">
+      <!-- Top bar -->
+      <header class="topbar">
+        <div class="topbar-welcome">
+          <h1 class="welcome-title" id="welcome-heading">Xin chào <span id="welcome-username">bạn</span></h1>
+        </div>
+        <div class="topbar-right">
+          <label class="topbar-search" for="topbar-search-input">
+            <svg class="icon" aria-hidden="true"><use href="#ic-search"/></svg>
+            <input id="topbar-search-input" type="search" placeholder="Tìm trong toàn bộ tài liệu…" aria-label="Tìm trong toàn bộ danh sách tài liệu đã chọn" maxlength="200" autocomplete="off">
+          </label>
+        </div>
+      </header>
+
+      <main id="main" class="page-content">
+        <div class="notice notice-error boot-error" id="boot-error" role="alert" hidden></div>
+
+        <section class="files-section" id="dashboard" aria-labelledby="allfiles-heading">
+          <div class="section-header">
+            <div>
+              <h2 id="allfiles-heading" class="section-title">Kho tài liệu cá nhân</h2>
+              <p class="section-copy">Lưu ảnh, tài liệu PDF và chia sẻ cho tài khoản khác với quyền truy cập rõ ràng.</p>
+            </div>
+          </div>
+          <div class="quota-card" aria-labelledby="quota-heading">
+            <div class="quota-heading">
+              <span class="card-heading-icon"><svg class="icon" aria-hidden="true"><use href="#ic-cloud"/></svg></span>
+              <div>
+                <strong id="quota-heading">Dung lượng tài khoản</strong>
+                <p><span id="quota-used">—</span> / <span id="quota-limit">50 MiB</span></p>
+              </div>
+              <span class="private-badge"><svg class="icon small" aria-hidden="true"><use href="#ic-shield"/></svg>Kho của bạn</span>
+            </div>
+            <progress id="quota-progress" max="100" value="0" aria-label="Dung lượng tài khoản đã sử dụng"></progress>
+            <p class="field-hint" id="quota-message" role="status" aria-live="polite">Đăng nhập để xem dung lượng của bạn.</p>
+          </div>
+        </section>
+
+        <!-- Recents Section (also shows real uploaded files) -->
+        <section class="files-section" id="recents" aria-labelledby="recents-heading">
+          <h2 id="recents-heading" class="section-title">Tài liệu của tôi</h2>
+          <p class="field-hint" id="library-description">Tìm kiếm trên toàn bộ tài liệu, tổ chức thư mục và chia sẻ theo tài khoản.</p>
+          <div class="library-tabs" role="tablist" aria-label="Danh sách tài liệu">
+            <button type="button" id="library-own" class="library-tab active" role="tab" aria-selected="true" aria-controls="file-library" data-library-view="own" disabled>Tài liệu của tôi</button>
+            <button type="button" id="library-shared" class="library-tab" role="tab" aria-selected="false" aria-controls="file-library" data-library-view="shared" tabindex="-1" disabled>Được chia sẻ với tôi</button>
+            <button type="button" id="library-trash" class="library-tab" role="tab" aria-selected="false" aria-controls="file-library" data-library-view="trash" tabindex="-1" disabled>Thùng rác</button>
+          </div>
+
+          <section id="folder-panel" class="folder-panel" aria-labelledby="folders-heading" hidden>
+            <div class="folder-heading"><h3 id="folders-heading">Thư mục</h3><button id="new-folder" type="button" class="button button-secondary" disabled>+ Tạo thư mục</button></div>
+            <nav id="folder-breadcrumbs" class="folder-breadcrumbs" aria-label="Đường dẫn thư mục"></nav>
+            <div id="folder-list" class="folder-list"></div>
+            <p id="folder-feedback" class="feedback" role="status" aria-live="polite"></p>
+          </section>
+          <p id="search-scope" class="field-hint search-scope" role="status" aria-live="polite">Tìm kiếm trên toàn bộ tài liệu; lọc và sắp xếp trước khi phân trang.</p>
+
+          <!-- Real file library table -->
+          <div class="file-table-wrap" id="file-library" role="tabpanel" aria-labelledby="library-own" data-view="own">
+            <div class="library-meta" id="library-meta-bar">
+              <span id="file-results-label">Đăng nhập để xem thư viện</span>
+              <div class="library-toolbar">
+                <label class="search-field" for="file-search">
+                  <svg class="icon" aria-hidden="true"><use href="#ic-search"/></svg>
+                  <input id="file-search" type="search" placeholder="Tìm tên tài liệu…" aria-label="Tìm tên tài liệu trên toàn bộ danh sách" maxlength="200" autocomplete="off" disabled>
+                </label>
+                <label class="select-wrap">
+                  <span class="sr-only">Lọc định dạng</span>
+                  <select id="file-filter" disabled>
+                    <option value="all">Tất cả loại tệp</option>
+                    <option value="pdf">PDF</option>
+                    <option value="image">Hình ảnh</option>
+                  </select>
+                  <svg class="icon tiny" aria-hidden="true"><use href="#ic-chevron"/></svg>
+                </label>
+                <label class="select-wrap">
+                  <span class="sr-only">Sắp xếp</span>
+                  <select id="file-sort" disabled>
+                    <option value="newest">Mới nhất</option>
+                    <option value="oldest">Cũ nhất</option>
+                    <option value="name">Tên A–Z</option>
+                    <option value="size">Dung lượng</option>
+                  </select>
+                  <svg class="icon tiny" aria-hidden="true"><use href="#ic-chevron"/></svg>
+                </label>
+                <button type="button" id="refresh-button" class="button button-secondary" disabled>
+                  <svg class="icon" aria-hidden="true"><use href="#ic-refresh"/></svg>
+                  Làm mới
+                </button>
+              </div>
+            </div>
+
+            <div class="empty-state" id="files-empty">
+              <span class="empty-art" aria-hidden="true">
+                <svg class="icon"><use href="#ic-folder"/></svg>
+              </span>
+              <h3 id="empty-title">Bắt đầu thư viện của bạn</h3>
+              <p id="empty-description">Đăng nhập để xem và quản lý tài liệu cá nhân.</p>
+            </div>
+
+            <div class="table-wrap" id="files-table-wrap" hidden>
+              <table class="file-table">
+                <thead>
+                  <tr>
+                    <th scope="col" class="th-name">
+                      Tên tài liệu
+                    </th>
+                    <th scope="col">Dung lượng</th>
+                    <th scope="col" id="file-date-heading">
+                      Cập nhật
+                    </th>
+                    <th scope="col">Chủ sở hữu</th>
+                    <th scope="col">Quyền truy cập</th>
+                    <th scope="col">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="files-body"></tbody>
+              </table>
+            </div>
+
+            <div class="pagination" id="pagination" hidden>
+              <span id="page-label">Trang 1</span>
+              <div>
+                <button type="button" id="previous-page" class="button button-quiet" disabled>← Trước</button>
+                <button type="button" id="next-page" class="button button-quiet" disabled>Tiếp →</button>
+              </div>
+            </div>
+            <p class="feedback file-feedback" id="files-feedback" role="status" aria-live="polite"></p>
+          </div>
+        </section>
+
+        <!-- Upload Section -->
+        <section class="card upload-panel" id="upload-area" aria-labelledby="upload-heading">
+          <div class="card-header compact">
+            <div>
+              <div class="overline">THÊM TÀI LIỆU</div>
+              <h2 id="upload-heading">Tải tệp mới</h2>
+            </div>
+            <span class="card-heading-icon blue">
+              <svg class="icon" aria-hidden="true"><use href="#ic-upload"/></svg>
+            </span>
+          </div>
+          <label for="file-input" class="drop-zone" id="drop-zone" aria-disabled="true">
+            <span class="upload-icon" aria-hidden="true"><svg class="icon"><use href="#ic-upload"/></svg></span>
+            <strong id="drop-title">Đăng nhập để tải lên</strong>
+            <span id="drop-description">Kéo thả hoặc <span class="text-link">chọn từ thiết bị</span></span>
+            <small>JPG, PNG, WEBP, PDF · Tối đa 10 MiB</small>
+            <input id="file-input" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" aria-label="Chọn tệp cần tải lên" disabled>
+          </label>
+          <div class="selected-file" id="selected-file" hidden>
+            <span class="file-symbol" aria-hidden="true"><svg class="icon"><use href="#ic-files"/></svg></span>
+            <div>
+              <strong id="selected-name"></strong>
+              <span id="selected-meta"></span>
+            </div>
+            <button type="button" id="clear-file" class="icon-button" aria-label="Bỏ chọn tệp">
+              <svg class="icon"><use href="#ic-x"/></svg>
+            </button>
+          </div>
+          <div class="upload-actions">
+            <p id="upload-help" class="field-hint">Tối đa 10 MiB/tệp · 50 MiB/tài khoản. Tệp trùng tên được lưu thành bản riêng.</p>
+            <button type="button" id="upload-button" class="button button-primary button-full" disabled>
+              <svg class="icon" aria-hidden="true"><use href="#ic-upload"/></svg>
+              Tải lên ngay
+            </button>
+          </div>
+          <div class="upload-progress" id="upload-progress" hidden>
+            <div class="progress-heading">
+              <span id="progress-label">Đang tải lên…</span>
+              <button type="button" id="cancel-upload" class="text-button">Hủy tải</button>
+            </div>
+            <progress id="progress-bar" max="100" value="0" aria-label="Tiến độ tải tệp lên"></progress>
+          </div>
+          <p class="feedback" id="upload-feedback" role="status" aria-live="polite"></p>
+        </section>
+
+        <!-- Auth Panel -->
+        <section class="card auth-panel" id="auth-section" aria-labelledby="auth-heading">
+          <div class="card-header compact">
+            <div>
+              <div class="overline">TÀI KHOẢN CỦA TÔI</div>
+              <h2 id="auth-heading">Đăng nhập an toàn</h2>
+            </div>
+            <span class="card-heading-icon">
+              <svg class="icon" aria-hidden="true"><use href="#ic-user"/></svg>
+            </span>
+          </div>
+          <p class="section-copy" id="auth-description">Đăng nhập để xem và quản lý các tệp chỉ thuộc về bạn.</p>
+          <div id="signed-out-view">
+            <div class="tabs" role="tablist" aria-label="Hình thức xác thực">
+              <button type="button" id="login-tab" class="tab active" role="tab" aria-selected="true" aria-controls="auth-form" disabled>Đăng nhập</button>
+              <button type="button" id="register-tab" class="tab" role="tab" aria-selected="false" aria-controls="auth-form" disabled>Đăng ký</button>
+            </div>
+            <form id="auth-form" role="tabpanel" aria-labelledby="login-tab">
+              <label for="email">Địa chỉ email</label>
+              <input id="email" name="email" type="email" autocomplete="username" placeholder="tenban@email.com" required maxlength="254" disabled>
+              <label for="password">Mật khẩu</label>
+              <div class="password-wrap">
+                <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Nhập mật khẩu" minlength="6" required disabled>
+                <button id="toggle-password" type="button" class="password-toggle" aria-label="Hiện mật khẩu" aria-pressed="false">
+                  <svg class="icon" aria-hidden="true"><use href="#ic-eye"/></svg>
+                </button>
+              </div>
+              <p class="field-hint">Dùng email và mật khẩu Firebase. Tối thiểu 6 ký tự khi đăng ký.</p>
+              <button type="submit" id="auth-submit" class="button button-primary button-full" disabled>Đăng nhập <span aria-hidden="true">→</span></button>
+              <button type="button" id="forgot-password" class="text-button forgot-password" disabled>Quên mật khẩu?</button>
+            </form>
+          </div>
+          <div id="signed-in-view" hidden>
+            <div class="account-card">
+              <span class="account-avatar" aria-hidden="true"><svg class="icon"><use href="#ic-check"/></svg></span>
+              <div>
+                <span class="account-state">Đang đăng nhập</span>
+                <strong id="account-email"></strong>
+              </div>
+            </div>
+            <dl class="account-details">
+              <dt>ID người dùng</dt>
+              <dd id="account-uid" class="mono"></dd>
+            </dl>
+            <section id="email-verification" class="email-verification" aria-label="Xác minh email" hidden>
+              <strong id="verification-status">Email chưa xác minh</strong>
+              <p>Email xác minh được gửi tự động khi đăng ký. Sau khi bạn mở liên kết trong email, trạng thái sẽ tự cập nhật.</p>
+              <div class="verification-actions">
+                <button type="button" id="send-verification" class="button button-secondary">Gửi lại email xác minh</button>
+              </div>
+              <p class="feedback" id="verification-feedback" role="status" aria-live="polite"></p>
+            </section>
+            <button type="button" id="signout-button" class="button button-secondary button-full">
+              <svg class="icon" aria-hidden="true"><use href="#ic-logout"/></svg>
+              Đăng xuất
+            </button>
+          </div>
+          <p class="feedback" id="auth-feedback" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="card share-panel" id="download-area" aria-labelledby="download-heading">
+          <div class="share-heading">
+            <span class="share-heading-icon"><svg class="icon" aria-hidden="true"><use href="#ic-shield"/></svg></span>
+            <div>
+              <div class="overline">TÀI LIỆU RIÊNG TƯ</div>
+              <h2 id="download-heading">Tải xuống bằng tài khoản của bạn</h2>
+              <p>Chọn <strong>Tải xuống</strong> bên cạnh tài liệu. Mỗi lượt tải được kiểm tra quyền truy cập của bạn.</p>
+            </div>
+          </div>
+          <p class="feedback" id="download-feedback" role="status" aria-live="polite"></p>
+        </section>
+
+        <!-- Technical Details -->
+        <details class="technical-details" id="technical-details">
+          <summary>
+            <svg class="icon" aria-hidden="true"><use href="#ic-shield"/></svg>
+            Thông tin kết nối &amp; kiểm tra API
+            <svg class="icon tiny" aria-hidden="true"><use href="#ic-chevron"/></svg>
+          </summary>
+          <div class="technical-content">
+            <div class="connection-details">
+              <div><span>Firebase Project</span><strong id="project-id" class="mono">—</strong></div>
+              <div><span>Storage Bucket</span><strong id="bucket-name" class="mono">—</strong></div>
+              <div><span>Thư mục tệp hiện tại</span><strong id="user-prefix" class="mono">Đăng nhập để xem</strong></div>
+            </div>
+            <div class="verification">
+              <div>
+                <strong>Kiểm tra xác thực Backend</strong>
+                <p>Xác minh Firebase ID Token với FastAPI tại <code>/api/auth/me</code>.</p>
+              </div>
+              <button type="button" id="verify-button" class="button button-secondary" disabled>Xác thực với API <svg class="icon small" aria-hidden="true"><use href="#ic-arrow"/></svg></button>
+            </div>
+            <p class="feedback" id="verify-feedback" role="status" aria-live="polite"></p>
+            <a class="technical-link" href="/setup">Xem trang kiểm tra hệ thống <svg class="icon small" aria-hidden="true"><use href="#ic-external"/></svg></a>
+          </div>
+        </details>
+
+        <footer class="footer">
+          <span>© FileSpace · Student File Hub</span>
+          <span>Được xây dựng với FastAPI &amp; Firebase</span>
+        </footer>
+      </main>
+    </div>
+  </div>
+
+  <dialog id="delete-dialog" class="confirm-dialog" aria-labelledby="delete-heading" aria-describedby="delete-description">
+    <form method="dialog">
+      <span class="dialog-danger-icon"><svg class="icon" aria-hidden="true"><use href="#ic-trash"/></svg></span>
+      <h2 id="delete-heading">Xóa tài liệu này?</h2>
+      <p id="delete-description">Tài liệu trong thùng rác vẫn chiếm dung lượng. Chỉ xóa vĩnh viễn khi bạn không còn cần tài liệu.</p>
+      <div class="dialog-file" id="delete-filename"></div>
+      <div class="dialog-actions">
+        <button type="submit" class="button button-secondary" value="cancel">Giữ lại</button>
+        <button type="submit" id="confirm-delete" class="button button-danger" value="confirm">Xóa vĩnh viễn</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="share-dialog" class="share-dialog" aria-labelledby="share-heading" aria-describedby="share-help">
+    <div class="share-dialog-header">
+      <div>
+        <div class="overline">QUYỀN TRUY CẬP</div>
+        <h2 id="share-heading">Chia sẻ tài liệu</h2>
+      </div>
+      <button type="button" id="share-close" class="icon-button" aria-label="Đóng chia sẻ">
+        <svg class="icon" aria-hidden="true"><use href="#ic-x"/></svg>
+      </button>
+    </div>
+    <p class="dialog-file" id="share-filename"></p>
+    <p class="section-copy" id="share-help">Người nhận cần có tài khoản FileSpace. Họ được xem và tải xuống; bạn giữ quyền quản lý tài liệu. Tối đa 20 người nhận.</p>
+    <form id="share-form" class="share-form">
+      <label for="share-email">Email người nhận</label>
+      <div class="share-form-row">
+        <input id="share-email" name="recipient-email" type="email" required maxlength="254" autocomplete="off" placeholder="nguoinhan@email.com">
+        <button type="submit" id="share-submit" class="button button-primary">Chia sẻ</button>
+      </div>
+    </form>
+    <div class="share-list-heading">
+      <h3>Người có quyền truy cập</h3>
+      <button type="button" id="share-refresh" class="text-button">Làm mới</button>
+    </div>
+    <ul id="share-recipients" class="share-recipients" aria-label="Danh sách người nhận"></ul>
+    <p class="feedback" id="share-feedback" role="status" aria-live="polite"></p>
+    <p class="share-policy">Chuyển tài liệu vào thùng rác sẽ thu hồi mọi quyền chia sẻ. Khôi phục tài liệu sẽ giữ trạng thái riêng tư.</p>
+  </dialog>
+
+  <dialog id="manager-dialog" class="share-dialog manager-dialog" aria-labelledby="manager-heading" aria-describedby="manager-description">
+    <div class="share-dialog-header"><h2 id="manager-heading">Quản lý tài liệu</h2><button id="manager-close" type="button" class="icon-button" aria-label="Đóng quản lý">×</button></div>
+    <p id="manager-description" class="section-copy"></p>
+    <form id="manager-form" class="manager-form">
+      <div id="manager-name-field"><label for="manager-name">Tên</label><input id="manager-name" type="text" maxlength="120" autocomplete="off"></div>
+      <div id="manager-target-field" hidden><label for="manager-target">Thư mục đích</label><select id="manager-target" aria-label="Chọn thư mục đích"></select></div>
+      <p id="manager-feedback" class="feedback" role="status" aria-live="polite"></p>
+      <button id="manager-submit" type="submit" class="button button-primary button-full">Lưu thay đổi</button>
+    </form>
+  </dialog>
+  <dialog id="preview-dialog" class="preview-dialog" aria-labelledby="preview-heading">
+    <div class="share-dialog-header"><h2 id="preview-heading">Xem trước tài liệu</h2><button id="preview-close" type="button" class="icon-button" aria-label="Đóng xem trước">×</button></div>
+    <div id="preview-content" class="preview-content"></div>
+    <p id="preview-feedback" class="feedback" role="status" aria-live="polite"></p>
+    <button id="preview-download" type="button" class="button button-secondary" disabled>Tải xuống</button>
+  </dialog>
+  <dialog id="reset-dialog" class="share-dialog" aria-labelledby="reset-heading">
+    <div class="share-dialog-header"><h2 id="reset-heading">Đặt lại mật khẩu</h2><button id="reset-close" type="button" class="icon-button" aria-label="Đóng đặt lại mật khẩu">×</button></div>
+    <p class="section-copy">Nhập email bạn dùng để đăng ký. Nếu tài khoản tồn tại, bạn sẽ nhận được hướng dẫn đặt lại mật khẩu.</p>
+    <form id="reset-form" class="manager-form"><label for="reset-email">Email tài khoản</label><input id="reset-email" type="email" required maxlength="254" autocomplete="email"><button id="reset-submit" type="submit" class="button button-primary button-full">Gửi hướng dẫn</button></form>
+    <p id="reset-feedback" class="feedback" role="status" aria-live="polite"></p>
+  </dialog>
+
+  <!-- Stat cards kept hidden for js compatibility -->
+  <div hidden>
+    <span id="stat-total"></span>
+    <span id="stat-size"></span>
+    <span id="stat-docs"></span>
+    <span id="stat-images"></span>
+    <span id="file-count">0</span>
+    <span id="environment-dot"></span>
+    <span id="environment-label"></span>
+  </div>
+
+  <script>
+    window.__setWelcomeName = function(name) {
+      const welcomeName = document.getElementById('welcome-username');
+      if (welcomeName) welcomeName.textContent = name || 'bạn';
+    };
+  </script>
+</body>
+</html>

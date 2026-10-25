@@ -1,0 +1,22 @@
+{
+  "name": "firebase-storage-member2-seminar",
+  "private": true,
+  "version": "1.3.1",
+  "type": "module",
+  "engines": {
+    "node": ">=24.12.0"
+  },
+  "scripts": {
+    "vendor:pdf": "node scripts/vendor-pdfjs.mjs",
+    "emulators": "firebase emulators:start --only auth,storage --project demo-firebase-storage",
+    "test": "node --test tests/file-policy.test.js tests/ui-contract.test.js tests/verification-sync.test.js",
+    "test:policy": "node --test tests/file-policy.test.js",
+    "test:integration": "node --test --test-concurrency=1 tests/emulator.integration.test.js",
+    "test:emulators": "firebase emulators:exec --only auth,storage --project demo-firebase-storage \"npm run test:integration\""
+  },
+  "devDependencies": {
+    "firebase": "13.0.0",
+    "firebase-tools": "15.34.0",
+    "pdfjs-dist": "6.4.299"
+  }
+}

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Student File Hub | Seminar Firebase Storage</title>
+  <style>
+    :root{font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;color:#13253e;background:#f3f6fc}
+    *{box-sizing:border-box}body{margin:0}header{padding:24px 7%;background:#182e50;color:white}
+    .tag{color:#72e5d0;letter-spacing:.11em;font-size:12px;font-weight:800;text-transform:uppercase}
+    main{max-width:940px;padding:30px 22px;margin:auto}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+    .card{background:white;border-radius:15px;padding:23px;box-shadow:0 8px 30px #233b6112}.card h2{margin-top:0;font-size:19px}
+    button{cursor:pointer;background:#165ad2;border:0;border-radius:9px;padding:12px 15px;color:white;font-weight:700}
+    button:hover{background:#0d3fa5}code,pre{background:#edf2fb;border-radius:6px;padding:4px 6px}
+    pre{white-space:pre-wrap;padding:12px;min-height:55px;font-size:13px}p{line-height:1.55;color:#4a5b74}
+    footer{max-width:940px;margin:16px auto;padding:0 22px;color:#67748a;font-size:13px}
+  </style>
+</head>
+<body>
+<header><div class="tag">Firebase Storage Workshop • Thành viên 1</div><h1>Student File Hub</h1>
+  <div>Bảng kiểm tra FastAPI và kết nối Firebase Storage — dùng được ở Cloud hoặc Emulator.</div></header>
+<main><div class="grid">
+  <section class="card"><h2>1. FastAPI hoạt động?</h2><p>Kiểm tra máy chủ Python, không yêu cầu Firebase Storage.</p>
+    <button onclick="check('/api/health','health')">Kiểm tra Backend</button><pre id="health">Chưa kiểm tra</pre></section>
+  <section class="card"><h2>2. Trạng thái cấu hình</h2><p>Xem Project ID, chế độ Cloud/Emulator và cờ kiểm tra Storage Admin.</p>
+    <button onclick="check('/api/project-status','project')">Xem cấu hình</button><pre id="project">Chưa kiểm tra</pre></section>
+  <section class="card"><h2>3. Firebase Storage connection</h2><p>Cloud dùng <code>status: ok</code> khi kiểm tra bucket thành công; Emulator trả <code>emulator</code>.</p>
+    <button onclick="check('/api/storage-check','storage')">Kiểm tra trạng thái</button><pre id="storage">Chưa kiểm tra</pre></section>
+  <section class="card"><h2>4. FileSpace đợt 3</h2><p><a href="/">Mở kho tài liệu</a>: thư mục, tìm kiếm toàn bộ danh sách, đổi tên/di chuyển, xem trước PDF/ảnh và quên mật khẩu. Quyền chia sẻ, thùng rác và hạn mức giữ nguyên. Giữ metadata .data khi nâng cấp; xem README cho Cloud.</p>
+    <a href="/docs">Mở tài liệu REST API (Swagger) →</a></section>
+</div></main><footer>Cấu hình dùng chung từ .env • Không hiển thị service account key trên website.</footer>
+<script>
+async function check(url,id){let el=document.getElementById(id);el.textContent='Đang kiểm tra...';try{let r=await fetch(url);let data=await r.json();el.textContent=JSON.stringify(data,null,2)}catch(e){el.textContent='Không kết nối được: '+e.message}}
+</script>
+</body></html>
