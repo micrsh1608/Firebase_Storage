@@ -40,6 +40,8 @@ export async function register(email, password) {
   }
 }
 
+//signInWithEmailAndPassword() là hàm của Firebase Authentication SDK.
+
 export async function login(email, password) {
   await ready;
   return signInWithEmailAndPassword(auth, email.trim(), password);
@@ -59,6 +61,8 @@ export function watchAuth(callback) {
 export function getCurrentUser() {
   return auth?.currentUser ?? null;
 }
+
+//Bearer Token ở đây là bằng chứng để backend biết ai đang yêu cầu truy cập.
 
 export async function verifyWithBackend() {
   await ready;

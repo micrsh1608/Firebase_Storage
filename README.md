@@ -1,409 +1,359 @@
 # FileSpace — Student File Hub
 
-> **Phiên bản: 1.3.1** · FastAPI · Firebase Authentication · Cloud Storage · SQLite  
-> Website quản lý tài liệu cá nhân và chia sẻ file theo tài khoản. Có thể chạy **hoàn toàn bằng Firebase Emulator** để học tập/demo, hoặc kết nối **Firebase Cloud thật** khi có quyền và cấu hình riêng.
+**Phiên bản source:** v1.3.1  
+**Backend:** Python FastAPI · **Đăng nhập:** Firebase Authentication · **Lưu file:** Firebase Cloud Storage thật · **Metadata nghiệp vụ:** SQLite  
+**Mục tiêu của README:** Hướng dẫn clone và chạy FileSpace với **Firebase Cloud thật**, **không dùng Firebase Emulator**.
 
-## Mục lục
+> **Phạm vi:** Các lệnh dưới đây chạy website FastAPI trên máy của bạn tại `http://127.0.0.1:8000` và kết nối qua Internet đến Firebase Authentication / Cloud Storage thật. Đây **chưa phải** hướng dẫn triển khai một website công khai trên Internet. Muốn phục vụ người dùng từ xa cần triển khai backend với HTTPS, cơ sở dữ liệu bền vững và cấu hình vận hành riêng.
 
-1. [Chức năng chính](#1-chức-năng-chính)
-2. [Cấu trúc dự án](#2-cấu-trúc-dự-án)
-3. [Yêu cầu môi trường](#3-yêu-cầu-môi-trường)
-4. [Cách A — Clone và chạy bằng Firebase Emulator (khuyên dùng)](#4-cách-a--clone-và-chạy-bằng-firebase-emulator-khuyên-dùng)
-5. [Cách B — Chạy với Firebase Cloud thật](#5-cách-b--chạy-với-firebase-cloud-thật)
-6. [Hướng dẫn sử dụng nhanh](#6-hướng-dẫn-sử-dụng-nhanh)
-7. [Các API và giới hạn](#7-các-api-và-giới-hạn)
-8. [Chạy kiểm thử](#8-chạy-kiểm-thử)
-9. [Lỗi thường gặp](#9-lỗi-thường-gặp)
-10. [Lưu trữ dữ liệu và bảo mật](#10-lưu-trữ-dữ-liệu-và-bảo-mật)
+## 1. FileSpace làm được gì?
 
----
+- Đăng ký, đăng nhập, đăng xuất, xác minh email và khôi phục mật khẩu qua Firebase Authentication.
+- Upload tài liệu qua FastAPI đến Firebase Cloud Storage; tải xuống và xem trước PDF/hình ảnh qua API có xác thực.
+- Quản lý thư mục nhiều cấp; đổi tên, di chuyển, tìm kiếm, lọc, sắp xếp và phân trang file.
+- Chia sẻ file theo tài khoản/email; người nhận được xem hoặc tải file còn quyền, không được tự sửa/xóa.
+- Chuyển file vào thùng rác, khôi phục và xóa vĩnh viễn.
+- Kiểm soát quyền và hạn mức ở backend: **10 MiB/file**, **50 MiB/tài khoản**, **200 file/tài khoản**. Thư mục tối đa **100/tài khoản**, sâu tối đa **10 cấp**; tối đa **20 người nhận/file**.
 
-## 1. Chức năng chính
-
-- **Tài khoản:** đăng ký, đăng nhập, đăng xuất, quên mật khẩu; xác minh email và tự cập nhật trạng thái (Cloud gửi email thật, Emulator mô phỏng).
-- **Tệp:** upload, tải xuống riêng tư, xem trước PDF/ảnh, đổi tên hiển thị và di chuyển tệp mà không đổi đường dẫn object trong Storage.
-- **Thư mục:** tạo, đổi tên, di chuyển, xóa thư mục rỗng; điều hướng breadcrumb và thư mục nhiều cấp.
-- **Tìm kiếm:** tìm tên tệp trong toàn bộ phạm vi được phép, lọc ảnh/PDF, sắp xếp và phân trang.
-- **Chia sẻ:** chủ sở hữu chia sẻ cho email tài khoản đã đăng ký; người nhận chỉ có quyền xem và tải; chủ file có thể thu hồi quyền.
-- **Thùng rác:** xóa mềm, khôi phục về trạng thái riêng tư và xóa vĩnh viễn.
-- **Phân quyền:** trình duyệt sử dụng Firebase Authentication; các thao tác file/thư mục qua **FastAPI**, xác minh Firebase ID Token ở backend. Firebase Storage Rules mặc định chặn truy cập trực tiếp bằng Web SDK.
-
-**Giới hạn hiện tại:** upload **từng file một**, tối đa **10 MiB/file**, **50 MiB** và **200 file/tài khoản**; tối đa **100 thư mục/tài khoản**, **10 cấp** và **20 người nhận/file**. Chưa hỗ trợ hàng đợi upload nhiều file, tự dọn thùng rác, quét virus hoặc triển khai production có nhiều server độc lập.
-
-## 2. Cấu trúc dự án
+### Kiến trúc thực tế của source
 
 ```text
-Firebase_Storage/                 # Thư mục gốc của repository sau khi clone
-├── app/
-│   ├── main.py                   # FastAPI, trang web, Swagger, Health Check
-│   ├── settings.py               # Cấu hình Emulator / Cloud từ .env
-│   ├── firebase_admin_client.py  # Khởi tạo Firebase Admin SDK
-│   ├── file_service.py           # Nghiệp vụ file, quota, phân quyền
-│   ├── file_state.py             # SQLite: thư mục, chia sẻ, thùng rác
-│   └── routes/
-│       ├── auth_demo.py          # Xác minh Firebase ID Token
-│       └── files.py              # API file và thư mục
-├── frontend/                     # HTML, CSS, JavaScript, PDF.js
-├── tests/                        # Python, JavaScript, Emulator tests
-├── docs/                         # Hướng dẫn và kết quả kiểm thử
-├── scripts/                      # Công cụ phụ trợ
-├── firebase.json                 # Cấu hình Auth/Storage Emulator
-├── storage.rules                 # Chặn truy cập Storage trực tiếp từ client
-├── package.json
-├── package-lock.json
-├── requirements.txt
-├── requirements-dev.txt
-├── .env.example                  # Mẫu cấu hình — được phép commit
-├── .gitignore
-└── README.md
+Browser / FileSpace UI
+  ├── Firebase Web SDK ────────────> Firebase Authentication (Cloud thật)
+  │         │ cấp Firebase ID Token
+  │         └── Authorization: Bearer <ID_TOKEN>
+  │
+  └── HTTP API ────────────────────> Python FastAPI (chạy tại localhost:8000)
+                                         ├── Firebase Admin SDK ──> Firebase Cloud Storage
+                                         │    (nội dung PDF/ảnh, quyền server)
+                                         └── SQLite (.data/) ──────> thư mục, tên hiển thị,
+                                                                      chia sẻ, thùng rác
 ```
 
-> **Đúng thư mục rất quan trọng:** Mọi lệnh bên dưới phải chạy tại thư mục chứa **`app/`, `frontend/`, `firebase.json` và `requirements.txt`**. Nếu giải nén bản ZIP được chia sẻ thay vì clone Git, bản ZIP gốc có thể lồng thư mục `Firebase_Storage/firebase_storage/`; hãy mở thư mục **`firebase_storage` bên trong** bằng VS Code.
+**Điểm cần hiểu:** File được lưu trên Firebase Cloud, nhưng **metadata SQLite vẫn nằm ở máy chạy FastAPI**. Hai người clone và chạy **hai backend riêng biệt**, dù kết nối cùng một Firebase Bucket, **không tự đồng bộ thư mục/chia sẻ/thùng rác qua SQLite**. Để chạy chung một hệ thống cho nhiều máy/người dùng, hãy triển khai **một backend dùng chung và một nơi lưu metadata bền vững dùng chung** (hoặc thiết kế chuyển metadata sang DB máy chủ). Không dùng các bản SQLite riêng biệt như một hệ thống cộng tác đa máy.
 
-## 3. Yêu cầu môi trường
+## 2. Yêu cầu trước khi chạy
 
-| Công cụ | Phiên bản / ghi chú |
-|---|---|
-| **Python** | 3.11 trở lên |
-| **Node.js** | **24.12.0 trở lên** theo `package.json` của phiên bản này |
-| **npm** | Đi kèm Node.js |
-| **Java JDK** | Phiên bản tương thích với Firebase Emulator; nhóm ghi nhận chạy được với JDK 24 |
-| **Git** | Để clone repository |
-| **VS Code** | Khuyên dùng, không bắt buộc |
-| **Trình duyệt** | Chrome/Edge; cần Internet để tải Firebase Web SDK từ CDN |
+Để chạy website với Firebase Cloud thật, cần:
 
-Kiểm tra trong Terminal:
+1. **Python 3.11 trở lên** (khuyến nghị Python 3.11–3.13) và `pip`.
+2. Git để clone source; trình duyệt Chrome/Edge/Firefox; kết nối Internet.
+3. **Firebase Project thật** đã tạo Cloud Storage Bucket trên gói **Blaze** (có thể phát sinh chi phí).
+4. Đã bật **Authentication → Sign-in method → Email/Password**.
+5. Đã đăng ký **Firebase Web App** và có các giá trị `apiKey`, `authDomain`, `storageBucket`, `appId` từ chính project đó.
+6. Backend có **Firebase Admin credentials** được cấp quyền phù hợp với Authentication và Storage; tuyệt đối không đưa private key vào GitHub.
 
-```powershell
-git --version
-py --version
-node --version
-npm --version
-java -version
-```
+**Không cần Node.js, Java hoặc chạy `npm run emulators` để sử dụng website ở Cloud mode.** Node.js/npm chỉ cần nếu bạn muốn chạy JavaScript tests, tái tạo PDF.js vendor hoặc triển khai Storage Rules bằng Firebase CLI. Tài nguyên PDF.js đã có trong `frontend/vendor/pdfjs/` của source này.
 
-Nếu dùng macOS/Linux, thay `py` bằng `python3` trong các lệnh tương ứng.
+> **Quyền truy cập của người clone:** Clone GitHub chỉ lấy được **source**, không tự cấp quyền truy cập Firebase Cloud của nhóm. Mỗi người phải sử dụng một Firebase Project của họ, hoặc được quản trị viên cấp quyền/credentials an toàn cho project dùng chung. **Không chia sẻ `serviceAccountKey.json` qua repository/chat công khai.**
 
-## 4. Cách A — Clone và chạy bằng Firebase Emulator (khuyên dùng)
+## 3. Chuẩn bị Firebase Cloud thật
 
-**Ưu điểm:** không cần tài khoản Firebase thật, không cần Blaze, không cần Service Account JSON và không dùng bucket Cloud của nhóm.
+Truy cập [Firebase Console](https://console.firebase.google.com/), chọn project của bạn rồi thực hiện:
 
-### Bước 1. Clone source mới nhất
+1. **Storage → Files:** bảo đảm Bucket đã được tạo, ghi nhận **đúng tên bucket** (không thêm `gs://` vào `.env`). Firebase Storage yêu cầu project có cấu hình thanh toán Blaze.
+2. **Authentication → Sign-in method:** bật **Email/Password**. Nếu dùng liên kết xác minh/khôi phục email trên domain riêng, kiểm tra **Authentication → Settings → Authorized domains** và cấu hình email template khi cần.
+3. **Project settings → General → Your apps → Web App → SDK setup and configuration → Config:** lấy `apiKey`, `authDomain`, `storageBucket`, `appId` của **cùng project**.
+4. **Project settings → Service accounts:** chuẩn bị Admin credentials cho backend. Khi chạy trên máy cá nhân, cách dễ nhất là **Generate new private key**, lưu JSON riêng trên máy. Cách phù hợp hơn khi triển khai lên Google Cloud là dùng Application Default Credentials/Workload Identity, không lưu JSON khóa dài hạn.
+5. **Storage → Rules:** giữ quyền client **deny-all** theo `storage.rules` của source. Bản FileSpace này tải file qua **FastAPI + Admin SDK**, nên người dùng không cần truy cập Storage trực tiếp bằng Web SDK. Không đổi Rules thành `allow read, write: if true`.
 
-Mở Terminal tại thư mục muốn lưu dự án:
+**Project nhóm trước đây:** `student-file-hub-seminar-7a7f2`. Hãy đối chiếu tên thực tế trong Console; nếu dùng project khác, **thay toàn bộ** các giá trị tương ứng bên dưới.
 
-```powershell
+Tài liệu Firebase chính thức: [Cloud Storage](https://firebase.google.com/docs/storage/web/start) · [Firebase Admin SDK](https://firebase.google.com/docs/admin/setup) · [Firebase Authentication](https://firebase.google.com/docs/auth/web/start).
+
+## 4. Clone source về máy
+
+Mở Terminal / PowerShell tại thư mục muốn lưu dự án:
+
+```bash
 git clone https://github.com/micrsh1608/Firebase_Storage.git
 cd Firebase_Storage
 ```
 
-Lưu ý: `git clone` mặc định lấy **nhánh mặc định của GitHub**. Người quản lý repository phải bảo đảm nhánh đó chứa **FileSpace v1.3.1** trước khi chia sẻ hướng dẫn. Nếu dùng bản ZIP và thư mục gốc khác, `cd` đến đúng nơi có `app/` và `requirements.txt`.
+> Repository phải được push **đúng bản source v1.3.1** lên nhánh mặc định. Nếu clone về thiếu `app/routes/files.py`, `app/file_service.py` hoặc `frontend/vendor/pdfjs/`, hãy kiểm tra nhánh và trao đổi với nhóm trước khi chạy. File ZIP của nhóm từng được đóng gói ở đường dẫn lồng `Firebase_Storage/firebase_storage/`; với ZIP tải thủ công, hãy **mở Terminal tại thư mục thực sự chứa `app/`, `frontend/`, `requirements.txt`**, không phải thư mục cha bên ngoài.
 
-### Bước 2. Cài thư viện Python
+## 5. Cài đặt Python và dependencies
 
-**Windows (PowerShell):**
+### Windows (PowerShell)
 
 ```powershell
-py -m venv .venv
+py -3 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-**macOS / Linux:**
+Nếu `py` không tồn tại, thử `python -m venv .venv`.
+
+### Linux / macOS (Terminal)
 
 ```bash
 python3 -m venv .venv
+./.venv/bin/python -m pip install --upgrade pip
 ./.venv/bin/python -m pip install -r requirements.txt
 ```
 
-### Bước 3. Cài thư viện Node.js / Firebase CLI
+Nếu Linux báo thiếu `ensurepip`/`venv`, hãy cài gói `python3-venv` tương ứng với bản Python/hệ điều hành trước khi tạo môi trường.
 
-```powershell
-npm ci
-```
+**Không sao chép `.venv` từ Windows sang Linux/macOS.** Mỗi máy cần tự tạo môi trường Python riêng.
 
-Lệnh này sử dụng `package-lock.json`, bao gồm Firebase CLI cần cho Emulator. **Không cần cài Firebase CLI toàn cục.** Nếu bạn chỉ muốn chạy demo, không cần chạy `npm run vendor:pdf` vì bộ PDF.js đã có trong `frontend/vendor/pdfjs/`.
+## 6. Tạo và điền `.env` cho Cloud thật (bắt buộc)
 
-### Bước 4. Tạo cấu hình Emulator
+Ở thư mục gốc có `.env.example`:
 
-**Windows PowerShell:**
+**Windows PowerShell**
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-**macOS / Linux:**
+**Linux / macOS**
 
 ```bash
 cp .env.example .env
 ```
 
-Mở `.env`, giữ các giá trị đang có trong cấu hình mặc định:
+Sau đó mở **`.env`** và **thay phần cấu hình chạy** bằng mẫu sau (đừng để các dòng cấu hình Emulator mặc định của `.env.example` có hiệu lực):
 
 ```dotenv
-DEMO_MODE=emulator
-FIREBASE_PROJECT_ID=demo-firebase-storage
-STORAGE_ENABLED=false
-```
-
-**Không** chuyển `DEMO_MODE` thành `cloud` nếu chưa có dự án Firebase và credential phù hợp. Nếu `.env` đã được cấu hình trước đó, không ghi đè mà hãy kiểm tra/sao lưu trước.
-
-### Bước 5. Khởi động Firebase Emulator — Terminal 1
-
-Trong VS Code: **Terminal → New Terminal**, ở thư mục gốc chạy:
-
-```powershell
-npm run emulators
-```
-
-Giữ Terminal này mở. Các dịch vụ mặc định:
-
-| Dịch vụ | Địa chỉ |
-|---|---|
-| Firebase Authentication Emulator | `127.0.0.1:9099` |
-| Firebase Storage Emulator | `127.0.0.1:9199` |
-| Emulator UI | http://127.0.0.1:4000 |
-
-### Bước 6. Khởi động FastAPI — Terminal 2
-
-Mở **một Terminal khác** ở cùng thư mục dự án:
-
-**Windows:**
-
-```powershell
-.\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8011
-```
-
-**macOS / Linux:**
-
-```bash
-./.venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8011
-```
-
-### Bước 7. Truy cập ứng dụng
-
-| Địa chỉ | Mục đích |
-|---|---|
-| **http://127.0.0.1:8011/** | Website FileSpace |
-| http://127.0.0.1:8011/setup | Trang kiểm tra cấu hình |
-| http://127.0.0.1:8011/docs | Swagger REST API |
-| http://127.0.0.1:8011/api/health | Kiểm tra FastAPI (`status: ok`) |
-| http://127.0.0.1:8011/api/project-status | Xác nhận `mode: emulator` |
-| http://127.0.0.1:4000/ | Firebase Emulator UI |
-
-**Lưu ý:** Khi chạy Emulator, `GET /api/storage-check` trả về `status: emulator`, **không phải `status: ok` cho Cloud**. Điều này là bình thường.
-
-### Bước 8. Tự kiểm tra nghiệp vụ
-
-1. Mở website và **Đăng ký** tài khoản demo A; đăng nhập.
-2. Tạo một thư mục, upload ảnh hoặc PDF hợp lệ (**không quá 10 MiB**).
-3. Tìm kiếm tệp; thử đổi tên, di chuyển thư mục và xem trước.
-4. Thử chuyển tệp vào thùng rác, khôi phục rồi xóa vĩnh viễn.
-5. Đăng ký tài khoản B bằng email khác; dùng A chia sẻ một file cho B; đăng nhập B và xem mục **Được chia sẻ với tôi**.
-6. Thử mục **Quên mật khẩu**. Trong Emulator, thao tác được mô phỏng; **không có email thật gửi đi**.
-
-Dừng hai terminal bằng **Ctrl + C**. Mặc định dữ liệu tài khoản/file của Emulator có thể mất khi dừng; muốn giữ cần cấu hình import/export cho Emulator. Xem thêm mục lưu trữ dữ liệu ở cuối README.
-
----
-
-## 5. Cách B — Chạy với Firebase Cloud thật
-
-**Chỉ dùng khi bạn được cấp quyền vào một Firebase Project, có Cloud Storage Bucket và được phép sử dụng backend credentials.** Để chạy demo nhóm, nên ưu tiên Cách A.
-
-### Bước 1. Chuẩn bị dịch vụ trên Firebase Console
-
-Tại [Firebase Console](https://console.firebase.google.com/):
-
-1. Chọn **đúng Project ID** (không chỉ nhìn tên hiển thị).
-2. Vào **Authentication → Sign-in method**, bật **Email/Password**.
-3. Tạo **Cloud Storage Bucket**. Dự án cần gói thanh toán/hạn mức phù hợp để dùng Cloud Storage.
-4. Trong **Project settings → General → Your apps**, tạo/chọn Web App và lấy `apiKey`, `authDomain`, `projectId`, `storageBucket`, `appId`.
-5. Kiểm tra **Authentication → Settings → Authorized domains** nếu gặp lỗi miền localhost không được phép.
-6. Giữ Storage Security Rules **từ chối client trực tiếp** theo `storage.rules` của repository. Phiên bản này upload/download qua FastAPI và Firebase Admin SDK, **không** upload bằng Firebase Web Storage SDK. Nếu cần deploy Rules, bảo đảm bạn có quyền và hiểu việc deploy sẽ thay Rules trên project đích.
-
-### Bước 2. Điền `.env` cho Cloud
-
-Từ `.env.example`, tạo `.env` và **thay thế** cấu hình Emulator bằng mẫu dưới đây (không để hai dòng `DEMO_MODE` cùng hoạt động):
-
-```dotenv
+# BẮT BUỘC: chạy Firebase Cloud thật, KHÔNG chạy Emulator
 DEMO_MODE=cloud
-FIREBASE_PROJECT_ID=YOUR_FIREBASE_PROJECT_ID
-FIREBASE_WEB_API_KEY=YOUR_FIREBASE_WEB_API_KEY
-FIREBASE_AUTH_DOMAIN=YOUR_FIREBASE_PROJECT_ID.firebaseapp.com
-FIREBASE_STORAGE_BUCKET=YOUR_ACTUAL_BUCKET.firebasestorage.app
-FIREBASE_APP_ID=YOUR_FIREBASE_WEB_APP_ID
 STORAGE_ENABLED=true
+
+# Lấy từ Project settings > General và Storage > Files
+FIREBASE_PROJECT_ID=student-file-hub-seminar-7a7f2
+FIREBASE_WEB_API_KEY=YOUR_FIREBASE_WEB_API_KEY
+FIREBASE_AUTH_DOMAIN=student-file-hub-seminar-7a7f2.firebaseapp.com
+FIREBASE_STORAGE_BUCKET=student-file-hub-seminar-7a7f2.firebasestorage.app
+FIREBASE_APP_ID=YOUR_FIREBASE_WEB_APP_ID
+
+# Chỉ backend được dùng. Đây là đường dẫn đến file JSON BÍ MẬT trên máy.
 GOOGLE_APPLICATION_CREDENTIALS=secrets/serviceAccountKey.json
+
+# Tùy chọn: SQLite metadata, mặc định là thư mục .data của dự án
+# FILESPACE_DATA_DIR=.data
 ```
 
-Lấy chính xác `storageBucket` từ Firebase Console; **không** tự suy đoán đuôi bucket, không thêm `gs://`. Các trường Web Config được backend cấp cho trình duyệt qua `/api/demo-config`; **không cần sửa `frontend/firebase-client.js` để chèn config**.
+**Bạn phải tự thay** `YOUR_FIREBASE_WEB_API_KEY` và `YOUR_FIREBASE_WEB_APP_ID` bằng giá trị Firebase Console; kiểm tra `PROJECT_ID`, `AUTH_DOMAIN` và `STORAGE_BUCKET` trùng cùng project. API Key của Firebase Web App là cấu hình phía client, **không phải** khóa Admin; private key JSON mới là bí mật phải bảo vệ.
 
-### Bước 3. Cấp credentials cho FastAPI
+### 6.1. Đặt Service Account JSON vào đúng chỗ
 
-**Máy local được phép truy cập Cloud:** tại **Project settings → Service accounts**, tải khóa Service Account mới nếu quy trình của nhóm cho phép; đặt **chỉ trên máy chạy backend**:
+Tạo thư mục `secrets/` nếu chưa có, rồi đặt file khóa riêng của backend như sau:
 
 ```text
 Firebase_Storage/
-└── secrets/
-    └── serviceAccountKey.json    # KHÔNG COMMIT
+├── app/
+├── frontend/
+├── secrets/
+│   └── serviceAccountKey.json   <-- CHỈ lưu trên máy/backend tin cậy
+├── .env                         <-- không commit
+└── requirements.txt
 ```
 
-Nếu chạy trên hạ tầng Google Cloud, nên dùng **Application Default Credentials / Workload Identity** khi được cấu hình phù hợp thay cho file JSON. Khi đó bỏ dòng `GOOGLE_APPLICATION_CREDENTIALS` và để runtime cấp credentials. Tài khoản dịch vụ phải có các quyền Storage/Firebase Auth phù hợp; **không công khai private key**.
+Tên JSON trong `.env` phải trùng đường dẫn thực tế. Source tại `app/firebase_admin_client.py` **tự xử lý đường dẫn tương đối từ thư mục gốc dự án** nên áp dụng chung cho Windows/Linux/macOS.
 
-### Bước 4. Chạy FastAPI
+**Không upload `.env` hoặc `secrets/serviceAccountKey.json` lên GitHub.** Source đã có `.gitignore` cho các file đó, nhưng nếu file bí mật từng bị commit/chia sẻ công khai, hãy thu hồi khóa, cấp lại và kiểm tra lịch sử Git. Nếu dùng ADC trên môi trường Google Cloud có IAM phù hợp, có thể **bỏ** `GOOGLE_APPLICATION_CREDENTIALS` khỏi `.env` và để backend dùng Application Default Credentials.
 
-Đã cài Python dependencies theo Cách A, chạy:
+### 6.2. Không để biến môi trường Emulator còn hiệu lực
+
+Cloud mode sẽ từ chối khởi động nếu còn các biến:
+
+`FIREBASE_AUTH_EMULATOR_HOST`, `FIREBASE_STORAGE_EMULATOR_HOST`, `STORAGE_EMULATOR_HOST`.
+
+Nếu Terminal từng chạy Emulator, hãy **mở Terminal mới sạch** hoặc xóa các biến này:
+
+**PowerShell:**
 
 ```powershell
-.\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8011
+Remove-Item Env:FIREBASE_AUTH_EMULATOR_HOST,Env:FIREBASE_STORAGE_EMULATOR_HOST,Env:STORAGE_EMULATOR_HOST -ErrorAction SilentlyContinue
 ```
 
-Không cần chạy `npm run emulators` khi `DEMO_MODE=cloud`. Mở http://127.0.0.1:8011/ và kiểm tra:
+**Linux/macOS:**
 
-- `GET /api/project-status`: `mode` phải là `cloud`, `storage_enabled` phải là `true`.
-- `GET /api/storage-check`: khi Admin SDK kết nối đúng bucket, `status: ok` và trả về tên bucket.
-- Đăng ký/đăng nhập, xác minh email thật, upload và download bằng tài khoản thử nghiệm.
+```bash
+unset FIREBASE_AUTH_EMULATOR_HOST FIREBASE_STORAGE_EMULATOR_HOST STORAGE_EMULATOR_HOST
+```
 
-> Cloud phát sinh chi phí theo mức dùng. **Không chia sẻ một Service Account JSON cho mọi người chỉ để clone chạy thử.** Firebase Web API key không phải private key; dữ liệu vẫn phải được bảo vệ bằng xác thực, phân quyền backend, IAM và Storage Rules.
+Lưu ý `python-dotenv` của source dùng `override=False`: **biến môi trường đã tồn tại trong hệ thống có thể ghi đè `.env`**. Nếu backend vẫn báo `mode=emulator`, kiểm tra biến `DEMO_MODE` ở Terminal/hệ điều hành rồi khởi động lại.
 
----
+## 7. Khởi động FastAPI trên cổng 8000
 
-## 6. Hướng dẫn sử dụng nhanh
+**Chỉ cần MỘT Terminal**, không cần chạy Firebase Emulator.
 
-| Nghiệp vụ | Cách thao tác |
-|---|---|
-| Quản lý tài liệu | Vào **Tài liệu của tôi** để xem file sở hữu |
-| Thư mục | Chọn **Tạo thư mục**, mở thư mục, dùng **Đổi tên/Di chuyển** khi cần |
-| Upload | Mở thư mục đích → **Tải tệp lên** → chọn **một** file hợp lệ |
-| Download/Preview | Chọn file → **Tải xuống** hoặc **Xem trước** |
-| Tìm kiếm | Nhập tên file; có thể lọc PDF/ảnh, sắp xếp và phân trang |
-| Chia sẻ | Chủ file chọn **Chia sẻ**, nhập email người dùng đã đăng ký; người nhận vào **Được chia sẻ với tôi** |
-| Thu hồi | Chủ file vào mục chia sẻ để thu hồi quyền đã cấp |
-| Thùng rác | Chuyển file vào thùng rác → **Khôi phục** hoặc **Xóa vĩnh viễn** |
-| Quên mật khẩu | Tại trang đăng nhập chọn **Quên mật khẩu?** |
-
-**Ghi chú:** chia sẻ áp dụng **từng file**, không tự kế thừa từ thư mục. Thu hồi quyền ngăn truy cập mới nhưng không thể thu hồi bản sao người khác đã tải về.
-
-## 7. Các API và giới hạn
-
-Các API nghiệp vụ yêu cầu header `Authorization: Bearer <Firebase ID Token>`; các endpoint sức khỏe/cấu hình không cần token.
-
-| API | Mục đích |
-|---|---|
-| `GET /api/health` | Trạng thái FastAPI |
-| `GET /api/project-status` | Chế độ Emulator/Cloud và cấu hình |
-| `GET /api/storage-check` | Kiểm tra Storage Cloud (ở Cloud mode) |
-| `GET /api/auth/me` | Xác minh Firebase ID Token |
-| `GET /api/files` | Danh sách file + tìm kiếm/lọc/sắp xếp/phân trang |
-| `PUT /api/files?name=...` | Upload raw file body |
-| `PATCH /api/files/{name}` | Đổi tên hiển thị / di chuyển file |
-| `GET /api/files/{name}/content` | Tải file của mình |
-| `GET /api/files/{name}/preview` | Xem trước file được phép |
-| `GET /api/files/shared-with-me` | File được chia sẻ cho tôi |
-| `POST /api/files/{name}/shares` | Chia sẻ cho tài khoản khác |
-| `POST /api/files/{name}/trash` | Chuyển vào thùng rác |
-| `POST /api/files/{name}/restore` | Khôi phục file |
-| `DELETE /api/files/{name}` | Xóa vĩnh viễn file trong thùng rác |
-| `GET /api/folders`, `POST /api/folders` | Liệt kê / tạo thư mục |
-| `PATCH /api/folders/{id}`, `DELETE /api/folders/{id}` | Sửa / xóa thư mục rỗng |
-
-API chi tiết, tham số, quyền và giới hạn: [docs/file-operations.md](docs/file-operations.md). Xem thử API trực tiếp bằng Swagger tại `/docs`. Không dán token của tài khoản thật vào tài liệu công khai.
-
-## 8. Chạy kiểm thử
-
-Nếu chưa cài gói Python dành cho phát triển:
+### Windows
 
 ```powershell
-.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
-**Bài kiểm thử Python:**
+### Linux / macOS
+
+```bash
+./.venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+Khi chạy được sẽ xuất hiện thông báo tương tự:
+
+```text
+INFO:     Uvicorn running on http://127.0.0.1:8000
+INFO:     Application startup complete.
+```
+
+Mở các địa chỉ sau:
+
+| Địa chỉ | Mục đích |
+|---|---|
+| http://127.0.0.1:8000/ | Giao diện FileSpace |
+| http://127.0.0.1:8000/setup | Trang kiểm tra/cấu hình |
+| http://127.0.0.1:8000/docs | Swagger API |
+| http://127.0.0.1:8000/api/health | Kiểm tra FastAPI |
+| http://127.0.0.1:8000/health | Kiểm tra **mode=cloud** |
+| http://127.0.0.1:8000/api/project-status | Kiểm tra Project ID và bật Storage |
+| http://127.0.0.1:8000/api/storage-check | Kiểm tra kết nối **Cloud Storage thật** |
+
+> Nếu cổng `8000` đã bị chiếm, hãy **dừng FastAPI cũ** đang sử dụng cổng đó rồi chạy lại; không nên mở hai server trên cùng cổng. Nhấn **Ctrl + C** để dừng server.
+
+## 8. Xác minh hệ thống đang dùng Cloud THẬT
+
+Mở `http://127.0.0.1:8000/health`. Kết quả phải tương tự:
+
+```json
+{
+  "status": "ok",
+  "mode": "cloud"
+}
+```
+
+Tiếp theo mở `http://127.0.0.1:8000/api/project-status`:
+
+```json
+{
+  "firebase_project_configured": true,
+  "firebase_project_id": "student-file-hub-seminar-7a7f2",
+  "mode": "cloud",
+  "storage_enabled": true,
+  "storage_configured": true,
+  "storage_emulator_enabled": false
+}
+```
+
+Phản hồi thực tế có thêm trường `auth_note`.
+
+**Bước kiểm chứng quan trọng nhất:** mở `http://127.0.0.1:8000/api/storage-check`:
+
+```json
+{
+  "status": "ok",
+  "bucket": "student-file-hub-seminar-7a7f2.firebasestorage.app",
+  "message": "Kết nối Cloud Storage thành công."
+}
+```
+
+Đây là **kết quả mong đợi**, không phải kết quả đã chạy xác minh từ máy người clone. Nếu endpoint trả HTTP 503, xem phần xử lý lỗi; nếu trả `disabled`, hãy đặt `STORAGE_ENABLED=true` rồi khởi động lại. **Chỉ `mode=cloud` chưa chứng minh kết nối Storage; phải kiểm tra được `status=ok`.**
+
+### Kiểm tra các nghiệp vụ thật
+
+1. Mở FileSpace, **đăng ký tài khoản thử** bằng email hợp lệ. Firebase Authentication Cloud tạo tài khoản thật; email xác minh hoặc reset password có thể gửi email thật.
+2. Đăng nhập, mở chức năng **Xác thực với API**; kết quả hợp lệ đến từ `GET /api/auth/me` với Firebase ID Token.
+3. Tạo thư mục → upload một PDF/ảnh nhỏ hợp lệ → kiểm tra file có xuất hiện trong **Firebase Console → Storage → Files** (prefix `users/{uid}/`).
+4. Thử tải xuống/xem trước; đổi tên, di chuyển, chia sẻ cho tài khoản thử thứ hai đã xác minh email, rồi thử Trash/Restore.
+5. Không thử bằng tài liệu nhạy cảm. Dọn dữ liệu thử sau khi hoàn thành; các thao tác Cloud có thể phát sinh chi phí.
+
+**Lưu ý:** Truy cập `GET /api/auth/me` mà **không mang Bearer Token** trả HTTP 401 là hành vi **đúng** của API, không phải lỗi kết nối.
+
+## 9. Giới hạn và lưu trữ dữ liệu trên bản này
+
+| Hạng mục | Chính sách trong source |
+|---|---|
+| Định dạng upload | JPEG, PNG, WebP, PDF |
+| Dung lượng file | Tối đa **10 MiB/file** |
+| Tổng quota một tài khoản | **50 MiB**, tính cả file trong thùng rác |
+| Số lượng file | **200 file/tài khoản** |
+| Thư mục | **100 thư mục/tài khoản**, tối đa **10 cấp** |
+| Chia sẻ | Tối đa **20 người nhận/file**; người nhận xem/tải, không được quản lý file |
+| Danh sách | Tìm kiếm, lọc, sắp xếp rồi phân trang **20 file/trang** |
+
+Trong phiên bản này, upload từ trình duyệt truyền qua **FastAPI/XHR** rồi backend ghi lên Firebase Storage. Chưa có upload nhiều file theo hàng đợi, chunked/resumable upload giữa các phiên hoặc HTTP Range download cho file lớn. Không nên giới thiệu những chức năng đó như đã hoàn thành.
+
+**Dữ liệu bền vững:** Nội dung file ở Cloud Storage; tên hiển thị/thư mục/share/trash trong SQLite tại `.data/`. Hãy **sao lưu `.data/` cùng dữ liệu Cloud Storage**, không xóa `.data/` khi cập nhật code. Nếu thay backend hoặc đổi máy mà không di chuyển metadata SQLite, các nghiệp vụ thư mục/chia sẻ/thùng rác có thể không còn giống máy cũ. Cloud Storage không tự thay thế SQLite của ứng dụng.
+
+## 10. Các lỗi phổ biến khi chạy Cloud
+
+| Triệu chứng | Cách kiểm tra/khắc phục |
+|---|---|
+| `ValueError: Missing cloud configuration` | Chưa điền đầy đủ `FIREBASE_WEB_API_KEY`, `FIREBASE_APP_ID`, Project ID, Auth Domain hoặc Bucket trong `.env`. |
+| `/health` trả `mode: emulator` | `.env` vẫn là `DEMO_MODE=emulator` hoặc bị biến hệ thống ghi đè; sửa thành `cloud`, mở Terminal sạch và khởi động lại. |
+| Báo còn `FIREBASE_AUTH_EMULATOR_HOST` | Xóa các biến Emulator ở mục 6.2; không chạy các lệnh Emulator. |
+| `/api/storage-check` trả `disabled` | `STORAGE_ENABLED=false`; sửa `true` rồi restart FastAPI. |
+| `/api/storage-check` trả HTTP 503 | Kiểm tra bucket thực, Firebase Blaze, credentials JSON, IAM của service account và kết nối mạng. |
+| `/api/auth/me` trả HTTP 401 | Chưa gửi Bearer ID Token, token hết hạn hoặc sai Firebase Project; đăng nhập lại rồi thử. |
+| `/api/auth/me` trả HTTP 503 | Backend thiếu quyền/credentials hợp lệ hoặc Firebase Admin chưa kết nối được. |
+| `auth/operation-not-allowed` | Chưa bật Email/Password trong Firebase Console. |
+| Lỗi liên kết xác minh/reset email | Kiểm tra Authorized domains, Action URL/email template và giới hạn gửi email của Firebase Authentication. |
+| `WinError 10048` hoặc `Address already in use` | Cổng `8000` đã có tiến trình khác. Dừng server cũ bằng Ctrl+C hoặc kiểm tra tiến trình chiếm cổng. |
+| `ModuleNotFoundError` | Đã dùng sai Python/venv hoặc chưa cài `requirements.txt`; chạy đúng Python trong `.venv`. |
+| File cũ/Rules khác trên Cloud | Bảo đảm mọi giá trị trong `.env` thuộc **cùng một Firebase Project** và kiểm tra Rules đang publish. |
+| Thiếu hoặc lệch thư mục/chia sẻ giữa hai máy | Metadata SQLite `.data/` là cục bộ theo backend; cần một backend/DB chung, không chạy mỗi máy một bản DB riêng. |
+
+### Vấn đề Storage Security Rules
+
+Trong source, `storage.rules` mặc định:
+
+```javascript
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
+```
+
+Backend dùng **Admin SDK** để truy cập bucket, không bị các Rules dành cho client Web SDK chi phối. **Quyền người dùng phải được FastAPI xác minh** từ ID Token, không phải vì Rules tự phân quyền cho Admin SDK.
+
+Nếu Rules thực tế trên Console khác file trong repo, quản trị viên nên đối chiếu và publish Rules phù hợp. Có thể cấu hình thủ công ở **Storage → Rules**, hoặc dùng Firebase CLI (yêu cầu npm, quyền triển khai và cẩn trọng vì sẽ thay Rules hiện có):
+
+```bash
+npm ci
+npx firebase login
+npx firebase deploy --only storage --project student-file-hub-seminar-7a7f2
+```
+
+Các lệnh trên **chỉ deploy Rules lên Cloud thật**, không khởi chạy Emulator. Kiểm tra đúng project trước khi thực hiện.
+
+## 11. Chạy tests (tùy chọn, không bắt buộc để sử dụng Cloud)
+
+**Python tests:**
+
+**Windows**
 
 ```powershell
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
-**Unit tests JavaScript:**
+**Linux/macOS**
 
-```powershell
+```bash
+./.venv/bin/python -m pytest -q
+```
+
+**JavaScript unit tests** (cần cài Node.js đúng phiên bản trong `package.json`, npm):
+
+```bash
+npm ci
 npm test
 ```
 
-**Kiểm thử tích hợp bằng Firebase Emulator:**
+Bộ test integration cũ của repo có thể dùng Emulator để kiểm tra mã nguồn, nhưng **không thuộc quy trình chạy Cloud của README này**. Các kết quả kiểm thử trước đó trong `docs/verification.md` chủ yếu là kiểm thử cục bộ/Emulator; **không thay cho bằng chứng chạy Cloud thật**.
 
-1. Dừng `npm run emulators` đang chạy thủ công để tránh trùng cổng.
-2. Chạy:
+## 12. Bảo mật, GitHub và vận hành
 
-```powershell
-npm run test:emulators
-```
-
-Lệnh này sẽ **tự khởi động/dừng Emulator** và chạy integration tests. Nếu cần, đặt `FILESPACE_TEST_PYTHON` trỏ tới Python trong `.venv`.
-
-Theo [docs/verification.md](docs/verification.md) kèm bản source, nhóm ghi nhận **103 Python tests đạt**, cùng các bài kiểm thử JavaScript/Emulator bổ sung cho v1.3.1. Đây là kết quả ghi nhận trong tài liệu nhóm, không phải cam kết các test sẽ đạt trên mọi máy hoặc Firebase Cloud thật.
-
-## 9. Lỗi thường gặp
-
-| Triệu chứng | Nguyên nhân/cách kiểm tra |
-|---|---|
-| `py` hoặc `python` không nhận | Cài Python, bật PATH và khởi động lại Terminal |
-| `ModuleNotFoundError: fastapi` / `firebase_admin` | Chưa cài dependencies bằng Python trong `.venv` |
-| `npm ci` báo phiên bản Node không hợp lệ | Dùng **Node.js 24.12+** theo `package.json` |
-| `java` không được tìm thấy | Cài JDK và cấu hình `PATH` / `JAVA_HOME` |
-| Cổng `9099`, `9199` hoặc `4000` đang được dùng | Dừng Firebase Emulator cũ rồi chạy lại |
-| Cổng `8011` đang được dùng | Dừng FastAPI cũ hoặc chọn cổng khác, đồng bộ địa chỉ trình duyệt |
-| Trang `/` trắng / lỗi Firebase JS | Kiểm tra internet, Console trình duyệt và `GET /api/demo-config` |
-| CSS/icon bị lỗi | Mở `/static/styles.css`, kiểm tra HTTP 200; tải lại bằng `Ctrl + Shift + R` |
-| `/api/storage-check` trả `emulator` | Đúng khi chạy Emulator; không phải lỗi |
-| `/api/storage-check` trả HTTP 503 trong Cloud | Kiểm tra bucket, credential, IAM và billing |
-| `401` khi thao tác file | Chưa có token, token hết hạn hoặc backend chưa xác minh được phiên |
-| `403` / `404` khi tải file chia sẻ | Thiếu quyền, file đã bị thu hồi/xóa hoặc không còn tồn tại |
-| Upload bị từ chối | Kiểm tra loại file, giới hạn 10 MiB, tổng 50 MiB và 200 file/tài khoản |
-| Emulator chạy lại nhưng file/tài khoản mất | Chưa cấu hình import/export dữ liệu Emulator (đây là mặc định) |
-| `auth/unauthorized-domain` | Kiểm tra Authorized domains của Firebase Authentication |
-
-## 10. Lưu trữ dữ liệu và bảo mật
-
-### Những file không được đẩy lên GitHub
-
-```text
-.env
-secrets/serviceAccountKey.json
-secrets/*.json
-.venv/
-node_modules/
-.data/
-.runtime/
-.git/            # Không đóng gói lại lịch sử Git trong ZIP bàn giao
-```
-
-Repository đã có `.gitignore`; trước khi commit hãy kiểm tra:
-
-```powershell
-git status
-git ls-files .env secrets/serviceAccountKey.json
-git diff --cached --name-only
-```
-
-Nếu `git ls-files` liệt kê private key, **không push**. Bỏ theo dõi file và xử lý lịch sử Git/thu hồi khóa nếu từng bị công khai; thêm `.gitignore` không xóa dữ liệu khỏi những commit cũ.
-
-### Dữ liệu SQLite phải được giữ khi nâng cấp
-
-- Dữ liệu nội dung file nằm trong Firebase Storage (Cloud hoặc Emulator).
-- **Metadata về thư mục, tên hiển thị, chia sẻ và thùng rác nằm trong SQLite**, mặc định thư mục **`.data/`**, hoặc nơi được chọn qua `FILESPACE_DATA_DIR`.
-- **Không xóa `.data/` trên hệ thống đang dùng thật:** cần sao lưu đồng bộ với bucket. Dữ liệu này **không phải cache**.
-- Thư mục **`.runtime/`** dùng cho khóa thao tác trên filesystem; không cần commit. Các worker trên cùng máy cần chia sẻ dữ liệu/khóa theo thiết kế. Nhiều máy chủ riêng biệt cần giải pháp metadata và khóa phân tán trước khi vận hành production.
-- Auth/Storage Emulator mặc định không giữ dữ liệu khi dừng; muốn giữ phải cấu hình import/export cho Emulator. Không nên coi `.data/` là bản sao đầy đủ của file Storage.
-
-### Giới hạn phạm vi phiên bản
-
-FileSpace v1.3.1 là bản phục vụ đồ án/seminar và thử nghiệm; **chưa mặc nhiên đáp ứng các yêu cầu của dịch vụ lưu trữ thương mại**. Các hạng mục như rate limiting, kiểm tra malware, upload nhiều file trong một hàng đợi, dọn thùng rác tự động, sao lưu và triển khai nhiều server cần phát triển thêm.
-
-**Tài liệu tham khảo trong repository:**
-- [Nghiệp vụ và API](docs/file-operations.md)
-- [Kết quả kiểm thử](docs/verification.md)
-- [Tài liệu setup](docs/setup.md) *(có nội dung lịch sử các bản TV1–TV2; ưu tiên README này cho v1.3.1)*
-- [Ghi chú demo/seminar](docs/presentation-notes.md)
+- **Không commit:** `.env`, `secrets/*.json`, `.data/`, `.runtime/`, `.venv/`, `node_modules/`, file khóa hoặc dữ liệu cá nhân.
+- Trước khi push, kiểm tra `git status` và `git ls-files .env secrets/serviceAccountKey.json`; lệnh thứ hai không được liệt kê hai file nhạy cảm.
+- Bảo vệ tài khoản Firebase, cấp quyền tối thiểu cho backend và tạo **Google Cloud Billing Budget Alert**. Budget Alert chỉ cảnh báo, **không tự động chặn chi phí**.
+- Chỉ sử dụng `127.0.0.1:8000` cho phát triển cục bộ. Nếu mở website cho người dùng Internet, cần HTTPS, cơ chế triển khai backend phù hợp, xử lý khóa bí mật an toàn, cơ sở dữ liệu metadata dùng chung/bền vững, backup, logging và kiểm soát truy cập.
+- Bản ZIP làm việc có thể chứa `.env`, SQLite hoặc Service Account JSON. **Không upload nguyên ZIP đó lên GitHub**. Nếu private key từng bị đăng công khai, hãy thu hồi/đổi khóa và kiểm tra lịch sử repository.
 
 ---
 
-**Hướng dẫn nhanh nhất:** `git clone` → `py -m venv .venv` → `pip install -r requirements.txt` → `npm ci` → `Copy-Item .env.example .env` → chạy **`npm run emulators`** và **`uvicorn ... --port 8011`** ở hai Terminal → mở **http://127.0.0.1:8011/**.
+**Tóm tắt chạy nhanh:** Tạo Firebase Project Blaze + bật Email/Password + tạo Bucket → clone repo → tạo `.venv` và cài `requirements.txt` → tạo `.env` với `DEMO_MODE=cloud` và Firebase Web Config thật → cấu hình Admin credentials an toàn → chạy `uvicorn` trên cổng **8000** → kiểm tra `/health` (`cloud`) và `/api/storage-check` (`ok`) → đăng nhập và thử upload file thật.

@@ -23,6 +23,7 @@ def verified_user(
         raise HTTPException(503, "Chưa khởi tạo được Firebase Admin; kiểm tra cấu hình/credential backend") from None
     try:
         # UID comes from verified claims. Passwords never go through this endpoint.
+        # Hàm này kiểm tra tính hợp lệ của Firebase ID Token, bao gồm trạng thái thu hồi được hỗ trợ bởi Admin SDK.
         return auth.verify_id_token(
             credential.credentials, app=firebase_app, check_revoked=True
         )

@@ -1,4 +1,4 @@
-﻿// Dynamic imports keep SDK/CDN startup failures inside the visible boot error.
+// Dynamic imports keep SDK/CDN startup failures inside the visible boot error.
 let watchAuth, register, login, logout, getCurrentUser, verifyWithBackend, sendVerification, refreshVerification, resetPassword, getVerificationRetryAt;
 let verificationSync = null;
 let verificationConfirmed = false;
@@ -79,32 +79,32 @@ function feedback(target, message = '', type = 'success') {
 function friendlyError(error) {
   const code = error?.code || '';
   const messages = {
-    'auth/invalid-email': 'Email chÆ°a Ä‘Ãºng Ä‘á»‹nh dáº¡ng.',
-    'auth/missing-password': 'Vui lÃ²ng nháº­p máº­t kháº©u.',
-    'auth/weak-password': 'Máº­t kháº©u cáº§n cÃ³ Ã­t nháº¥t 6 kÃ½ tá»±.',
-    'auth/email-already-in-use': 'Email nÃ y Ä‘Ã£ Ä‘Æ°á»£c Ä‘Äƒng kÃ½. HÃ£y chuyá»ƒn sang ÄÄƒng nháº­p.',
-    'auth/invalid-credential': 'Email hoáº·c máº­t kháº©u chÆ°a Ä‘Ãºng.',
-    'auth/user-not-found': 'Email hoáº·c máº­t kháº©u chÆ°a Ä‘Ãºng.',
-    'auth/wrong-password': 'Email hoáº·c máº­t kháº©u chÆ°a Ä‘Ãºng.',
-    'auth/too-many-requests': 'QuÃ¡ nhiá»u yÃªu cáº§u. Vui lÃ²ng Ä‘á»£i má»™t lÃ¡t rá»“i thá»­ láº¡i.',
-    'auth/network-request-failed': 'KhÃ´ng káº¿t ná»‘i Ä‘Æ°á»£c dá»‹ch vá»¥ xÃ¡c thá»±c. Kiá»ƒm tra máº¡ng hoáº·c Auth Emulator.',
-    'auth/operation-not-allowed': 'Email/Password chÆ°a Ä‘Æ°á»£c báº­t trong Firebase Authentication.',
-    'auth/user-disabled': 'TÃ i khoáº£n Ä‘Ã£ bá»‹ vÃ´ hiá»‡u hÃ³a.',
-    'storage/unauthenticated': 'PhiÃªn Ä‘Äƒng nháº­p Ä‘Ã£ háº¿t háº¡n. Vui lÃ²ng Ä‘Äƒng nháº­p láº¡i.',
-    'storage/unauthorized': 'Báº¡n khÃ´ng cÃ³ quyá»n truy cáº­p tÃ i liá»‡u nÃ y.',
-    'storage/object-not-found': 'Tá»‡p khÃ´ng cÃ²n tá»“n táº¡i. HÃ£y lÃ m má»›i danh sÃ¡ch.',
-    'storage/canceled': 'ÄÃ£ dá»«ng yÃªu cáº§u táº£i lÃªn. Kiá»ƒm tra danh sÃ¡ch vÃ¬ mÃ¡y chá»§ cÃ³ thá»ƒ Ä‘Ã£ lÆ°u tá»‡p.',
-    'storage/network-error': 'Máº¥t káº¿t ná»‘i khi táº£i lÃªn. Kiá»ƒm tra danh sÃ¡ch trÆ°á»›c khi thá»­ láº¡i.',
-    'storage/request-timeout': 'YÃªu cáº§u Ä‘Ã£ háº¿t thá»i gian. Kiá»ƒm tra danh sÃ¡ch trÆ°á»›c khi thá»­ láº¡i.',
-    'storage/session-changed': 'PhiÃªn Ä‘Äƒng nháº­p Ä‘Ã£ thay Ä‘á»•i.',
-    'storage/retry-limit-exceeded': 'Káº¿t ná»‘i táº£i tá»‡p Ä‘Ã£ háº¿t thá»i gian. Kiá»ƒm tra máº¡ng rá»“i thá»­ láº¡i.',
-    'storage/quota-exceeded': 'Bucket Ä‘Ã£ vÆ°á»£t háº¡n má»©c. Kiá»ƒm tra cáº¥u hÃ¬nh vÃ  háº¡n má»©c Firebase.',
-    'storage/unknown': 'Kho tÃ i liá»‡u chÆ°a xá»­ lÃ½ Ä‘Æ°á»£c yÃªu cáº§u. Kiá»ƒm tra káº¿t ná»‘i rá»“i thá»­ láº¡i.',
+    'auth/invalid-email': 'Email chưa đúng định dạng.',
+    'auth/missing-password': 'Vui lòng nhập mật khẩu.',
+    'auth/weak-password': 'Mật khẩu cần có ít nhất 6 ký tự.',
+    'auth/email-already-in-use': 'Email này đã được đăng ký. Hãy chuyển sang Đăng nhập.',
+    'auth/invalid-credential': 'Email hoặc mật khẩu chưa đúng.',
+    'auth/user-not-found': 'Email hoặc mật khẩu chưa đúng.',
+    'auth/wrong-password': 'Email hoặc mật khẩu chưa đúng.',
+    'auth/too-many-requests': 'Quá nhiều yêu cầu. Vui lòng đợi một lát rồi thử lại.',
+    'auth/network-request-failed': 'Không kết nối được dịch vụ xác thực. Kiểm tra mạng hoặc Auth Emulator.',
+    'auth/operation-not-allowed': 'Email/Password chưa được bật trong Firebase Authentication.',
+    'auth/user-disabled': 'Tài khoản đã bị vô hiệu hóa.',
+    'storage/unauthenticated': 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.',
+    'storage/unauthorized': 'Bạn không có quyền truy cập tài liệu này.',
+    'storage/object-not-found': 'Tệp không còn tồn tại. Hãy làm mới danh sách.',
+    'storage/canceled': 'Đã dừng yêu cầu tải lên. Kiểm tra danh sách vì máy chủ có thể đã lưu tệp.',
+    'storage/network-error': 'Mất kết nối khi tải lên. Kiểm tra danh sách trước khi thử lại.',
+    'storage/request-timeout': 'Yêu cầu đã hết thời gian. Kiểm tra danh sách trước khi thử lại.',
+    'storage/session-changed': 'Phiên đăng nhập đã thay đổi.',
+    'storage/retry-limit-exceeded': 'Kết nối tải tệp đã hết thời gian. Kiểm tra mạng rồi thử lại.',
+    'storage/quota-exceeded': 'Bucket đã vượt hạn mức. Kiểm tra cấu hình và hạn mức Firebase.',
+    'storage/unknown': 'Kho tài liệu chưa xử lý được yêu cầu. Kiểm tra kết nối rồi thử lại.',
   };
   if (messages[code]) return messages[code];
   // The demo's own validation messages do not contain credentials or ID tokens.
   if (error instanceof Error && !code && error.message && error.message.length < 220 && !/token|bearer|eyJ/i.test(error.message)) return error.message;
-  return 'Thao tÃ¡c chÆ°a hoÃ n táº¥t. Kiá»ƒm tra cáº¥u hÃ¬nh, káº¿t ná»‘i vÃ  thá»­ láº¡i.';
+  return 'Thao tác chưa hoàn tất. Kiểm tra cấu hình, kết nối và thử lại.';
 }
 
 function sameUser(capturedGeneration, uid) {
@@ -116,18 +116,18 @@ function sameLibrary(capturedGeneration, uid, capturedView) {
 }
 
 function applyLibraryView() {
-  const titles = { own: 'TÃ i liá»‡u cá»§a tÃ´i', shared: 'ÄÆ°á»£c chia sáº» vá»›i tÃ´i', trash: 'ThÃ¹ng rÃ¡c' };
+  const titles = { own: 'Tài liệu của tôi', shared: 'Được chia sẻ với tôi', trash: 'Thùng rác' };
   const descriptions = {
-    own: 'Sáº¯p xáº¿p tÃ i liá»‡u trong thÆ° má»¥c vÃ  chia sáº» theo tÃ i khoáº£n. Tá»« khÃ³a tÃ¬m trong toÃ n bá»™ tÃ i liá»‡u cá»§a báº¡n.',
-    shared: 'Báº¡n cÃ³ thá»ƒ xem trÆ°á»›c vÃ  táº£i xuá»‘ng. Quyá»n quáº£n lÃ½ tÃ i liá»‡u thuá»™c chá»§ sá»Ÿ há»¯u.',
-    trash: 'TÃ i liá»‡u trong thÃ¹ng rÃ¡c váº«n chiáº¿m dung lÆ°á»£ng. KhÃ´i phá»¥c sáº½ giá»¯ tÃ i liá»‡u riÃªng tÆ° vÃ  khÃ´ng khÃ´i phá»¥c quyá»n chia sáº» cÅ©.',
+    own: 'Sắp xếp tài liệu trong thư mục và chia sẻ theo tài khoản. Từ khóa tìm trong toàn bộ tài liệu của bạn.',
+    shared: 'Bạn có thể xem trước và tải xuống. Quyền quản lý tài liệu thuộc chủ sở hữu.',
+    trash: 'Tài liệu trong thùng rác vẫn chiếm dung lượng. Khôi phục sẽ giữ tài liệu riêng tư và không khôi phục quyền chia sẻ cũ.',
   };
   el['recents-heading'].textContent = titles[libraryView];
   document.getElementById('file-library').dataset.view = libraryView;
   document.getElementById('file-library').setAttribute('aria-labelledby', 'library-' + libraryView);
   el['library-description'].textContent = descriptions[libraryView];
   el['folder-panel'].hidden = libraryView !== 'own';
-  document.getElementById('file-date-heading').textContent = { own: 'Cáº­p nháº­t', shared: 'ÄÆ°á»£c chia sáº»', trash: 'ÄÃ£ xÃ³a' }[libraryView];
+  document.getElementById('file-date-heading').textContent = { own: 'Cập nhật', shared: 'Được chia sẻ', trash: 'Đã xóa' }[libraryView];
   for (const control of document.querySelectorAll('[data-library-view]')) {
     const active = control.dataset.libraryView === libraryView;
     control.classList.toggle('active', active);
@@ -165,7 +165,7 @@ function switchLibraryView(view) {
   currentFiles = [];
   el['files-body'].replaceChildren();
   el.pagination.hidden = true;
-  showEmpty('Äang táº£i danh sÃ¡châ€¦', 'Vui lÃ²ng Ä‘á»£i trong giÃ¢y lÃ¡t.');
+  showEmpty('Đang tải danh sách…', 'Vui lòng đợi trong giây lát.');
   el['file-search'].value = '';
   document.getElementById('topbar-search-input').value = '';
   el['file-filter'].value = 'all';
@@ -174,20 +174,20 @@ function switchLibraryView(view) {
   updateMetrics();
   updateControls();
   if (currentUser) void loadFilePage();
-  else showEmpty('ÄÄƒng nháº­p Ä‘á»ƒ xem tÃ i liá»‡u', 'Sá»­ dá»¥ng tÃ i khoáº£n cá»§a báº¡n Ä‘á»ƒ má»Ÿ thÆ° viá»‡n.');
+  else showEmpty('Đăng nhập để xem tài liệu', 'Sử dụng tài khoản của bạn để mở thư viện.');
 }
 
 function formatSize(bytes) {
-  if (!Number.isFinite(Number(bytes))) return 'â€”';
+  if (!Number.isFinite(Number(bytes))) return '—';
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KiB`;
   return `${(bytes / (1024 * 1024)).toFixed(2)} MiB`;
 }
 
 function formatDate(value) {
-  if (!value) return 'ChÆ°a cÃ³ thá»i gian cáº­p nháº­t';
+  if (!value) return 'Chưa có thời gian cập nhật';
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'ChÆ°a cÃ³ thá»i gian cáº­p nháº­t';
+  if (Number.isNaN(date.getTime())) return 'Chưa có thời gian cập nhật';
   return date.toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
@@ -198,11 +198,11 @@ function updateVerification() {
   const verified = verificationConfirmed;
   const remaining = Math.max(0, Math.ceil(((getVerificationRetryAt?.(currentUser?.uid) || 0) - Date.now()) / 1000));
   el['email-verification'].hidden = !shown;
-  el['verification-status'].textContent = verified ? 'Email Ä‘Ã£ xÃ¡c minh'
-    : currentUser?.emailVerified ? 'Äang Ä‘á»“ng bá»™ xÃ¡c minh email' : 'Äang chá» xÃ¡c minh email';
+  el['verification-status'].textContent = verified ? 'Email đã xác minh'
+    : currentUser?.emailVerified ? 'Đang đồng bộ xác minh email' : 'Đang chờ xác minh email';
   el['verification-status'].classList.toggle('verified', verified);
   el['send-verification'].hidden = verified || Boolean(currentUser?.emailVerified);
-  el['send-verification'].textContent = remaining ? `Gá»­i láº¡i email (${remaining}s)` : 'Gá»­i láº¡i email xÃ¡c minh';
+  el['send-verification'].textContent = remaining ? `Gửi lại email (${remaining}s)` : 'Gửi lại email xác minh';
   el['send-verification'].disabled = !shown || verified || verificationBusy || authBusy || remaining > 0;
   if (shown && !verified && remaining > 0) verificationCooldownTimer = setTimeout(updateVerification, 1000);
 }
@@ -241,13 +241,13 @@ function switchAuthMode(mode) {
   }
   el['auth-form'].setAttribute('aria-labelledby', loggingIn ? 'login-tab' : 'register-tab');
   el.password.autocomplete = loggingIn ? 'current-password' : 'new-password';
-  el['auth-submit'].replaceChildren(document.createTextNode(loggingIn ? 'ÄÄƒng nháº­p ' : 'Táº¡o tÃ i khoáº£n '));
+  el['auth-submit'].replaceChildren(document.createTextNode(loggingIn ? 'Đăng nhập ' : 'Tạo tài khoản '));
   const arrow = document.createElement('span');
   arrow.setAttribute('aria-hidden', 'true');
-  arrow.textContent = 'â†’';
+  arrow.textContent = '→';
   el['auth-submit'].append(arrow);
   const heading = document.getElementById('auth-heading');
-  if (!currentUser) heading.textContent = loggingIn ? 'ÄÄƒng nháº­p an toÃ n' : 'Táº¡o tÃ i khoáº£n má»›i';
+  if (!currentUser) heading.textContent = loggingIn ? 'Đăng nhập an toàn' : 'Tạo tài khoản mới';
   feedback(el['auth-feedback']);
 }
 
@@ -258,12 +258,12 @@ function clearDownload() {
 
 function updateQuota(usage = null) {
   accountUsage = usage;
-  el['quota-used'].textContent = usage ? formatSize(usage.usedBytes) : 'â€”';
+  el['quota-used'].textContent = usage ? formatSize(usage.usedBytes) : '—';
   el['quota-limit'].textContent = usage ? formatSize(usage.maxBytes) : '50 MiB';
   el['quota-progress'].value = usage ? Math.min(100, usage.usedBytes / usage.maxBytes * 100) : 0;
   el['quota-message'].textContent = usage
-    ? `CÃ²n ${formatSize(Math.max(0, usage.maxBytes - usage.usedBytes))} Â· Má»—i tá»‡p tá»‘i Ä‘a ${formatSize(usage.maxFileBytes)} Â· ${usage.fileCount ?? 0}/${usage.maxFiles ?? 200} tá»‡p Â· Bao gá»“m thÃ¹ng rÃ¡c.`
-    : (currentUser ? 'Äang kiá»ƒm tra dung lÆ°á»£ng tÃ i khoáº£nâ€¦' : 'ÄÄƒng nháº­p Ä‘á»ƒ xem dung lÆ°á»£ng cá»§a báº¡n.');
+    ? `Còn ${formatSize(Math.max(0, usage.maxBytes - usage.usedBytes))} · Mỗi tệp tối đa ${formatSize(usage.maxFileBytes)} · ${usage.fileCount ?? 0}/${usage.maxFiles ?? 200} tệp · Bao gồm thùng rác.`
+    : (currentUser ? 'Đang kiểm tra dung lượng tài khoản…' : 'Đăng nhập để xem dung lượng của bạn.');
   updateControls();
 }
 
@@ -273,7 +273,7 @@ function clearSelectedFile() {
   el['selected-file'].hidden = true;
   el['selected-name'].textContent = '';
   el['selected-meta'].textContent = '';
-  el['upload-button'].textContent = 'Táº£i lÃªn ngay';
+  el['upload-button'].textContent = 'Tải lên ngay';
   updateControls();
 }
 
@@ -344,27 +344,27 @@ function onAuthChange(user) {
   feedback(el['verify-feedback']);
   el['signed-out-view'].hidden = Boolean(user);
   el['signed-in-view'].hidden = !user;
-  el['account-email'].textContent = user?.email || 'TÃ i khoáº£n Firebase';
+  el['account-email'].textContent = user?.email || 'Tài khoản Firebase';
   // Update welcome name in topbar
   if (window.__setWelcomeName) {
-    const name = user?.email ? user.email.split('@')[0] : 'báº¡n';
+    const name = user?.email ? user.email.split('@')[0] : 'bạn';
     window.__setWelcomeName(name);
   }
   el['account-uid'].textContent = user?.uid || '';
-  el['user-prefix'].textContent = user ? `users/${user.uid}/` : 'ÄÄƒng nháº­p Ä‘á»ƒ xem Ä‘Æ°á»ng dáº«n';
+  el['user-prefix'].textContent = user ? `users/${user.uid}/` : 'Đăng nhập để xem đường dẫn';
   document.querySelector('.topbar-avatar')?.classList.toggle('signed-in', Boolean(user));
-  document.getElementById('auth-heading').textContent = user ? 'TÃ i khoáº£n cá»§a báº¡n' : 'ÄÄƒng nháº­p an toÃ n';
-  el['drop-title'].textContent = user ? 'Tháº£ tá»‡p vÃ o Ä‘Ã¢y' : 'ÄÄƒng nháº­p Ä‘á»ƒ táº£i tá»‡p lÃªn';
-  el['auth-description'].textContent = user ? 'Báº¡n Ä‘ang sá»­ dá»¥ng kho tÃ i liá»‡u riÃªng cá»§a mÃ¬nh.' : 'DÃ¹ng email vÃ  máº­t kháº©u Ä‘á»ƒ má»Ÿ kho tÃ i liá»‡u cÃ¡ nhÃ¢n.';
+  document.getElementById('auth-heading').textContent = user ? 'Tài khoản của bạn' : 'Đăng nhập an toàn';
+  el['drop-title'].textContent = user ? 'Thả tệp vào đây' : 'Đăng nhập để tải tệp lên';
+  el['auth-description'].textContent = user ? 'Bạn đang sử dụng kho tài liệu riêng của mình.' : 'Dùng email và mật khẩu để mở kho tài liệu cá nhân.';
   el['verify-button'].disabled = !user;
   updateControls();
   if (user) {
-    el['file-results-label'].textContent = 'Äang láº¥y dá»¯ liá»‡uâ€¦';
+    el['file-results-label'].textContent = 'Đang lấy dữ liệu…';
     void loadFilePage();
     if (!verificationConfirmed) void verificationSync?.start(user);
   } else {
-    el['file-results-label'].textContent = 'ÄÄƒng nháº­p Ä‘á»ƒ xem thÆ° viá»‡n';
-    showEmpty('Báº¯t Ä‘áº§u thÆ° viá»‡n cá»§a báº¡n', 'ÄÄƒng nháº­p Ä‘á»ƒ xem vÃ  quáº£n lÃ½ tÃ i liá»‡u cÃ¡ nhÃ¢n.');
+    el['file-results-label'].textContent = 'Đăng nhập để xem thư viện';
+    showEmpty('Bắt đầu thư viện của bạn', 'Đăng nhập để xem và quản lý tài liệu cá nhân.');
   }
 }
 
@@ -374,27 +374,27 @@ function chooseFile(file) {
   if (!file) return;
   if (!ALLOWED_TYPES.has(file.type)) {
     clearSelectedFile();
-    feedback(el['upload-feedback'], 'Chá»‰ nháº­n JPEG, PNG, WEBP hoáº·c PDF cÃ³ MIME type há»£p lá»‡.', 'error');
+    feedback(el['upload-feedback'], 'Chỉ nhận JPEG, PNG, WEBP hoặc PDF có MIME type hợp lệ.', 'error');
     return;
   }
   if (file.size === 0 || file.size > MAX_SIZE) {
     clearSelectedFile();
-    feedback(el['upload-feedback'], file.size === 0 ? 'Tá»‡p rá»—ng chÆ°a thá»ƒ táº£i lÃªn. HÃ£y chá»n tá»‡p cÃ³ ná»™i dung.' : 'Tá»‡p vÆ°á»£t quÃ¡ 10 MiB. HÃ£y chá»n tá»‡p nhá» hÆ¡n.', 'error');
+    feedback(el['upload-feedback'], file.size === 0 ? 'Tệp rỗng chưa thể tải lên. Hãy chọn tệp có nội dung.' : 'Tệp vượt quá 10 MiB. Hãy chọn tệp nhỏ hơn.', 'error');
     return;
   }
   if (accountUsage && accountUsage.fileCount >= (accountUsage.maxFiles ?? 200)) {
     clearSelectedFile();
-    feedback(el['upload-feedback'], 'ÄÃ£ Ä‘áº¡t giá»›i háº¡n sá»‘ tÃ i liá»‡u. XÃ³a vÄ©nh viá»…n tÃ i liá»‡u trong thÃ¹ng rÃ¡c Ä‘á»ƒ táº£i thÃªm.', 'error');
+    feedback(el['upload-feedback'], 'Đã đạt giới hạn số tài liệu. Xóa vĩnh viễn tài liệu trong thùng rác để tải thêm.', 'error');
     return;
   }
   if (accountUsage && accountUsage.usedBytes + file.size > accountUsage.maxBytes) {
     clearSelectedFile();
-    feedback(el['upload-feedback'], 'Dung lÆ°á»£ng khÃ´ng Ä‘á»§. XÃ³a vÄ©nh viá»…n tÃ i liá»‡u trong thÃ¹ng rÃ¡c hoáº·c chá»n tá»‡p nhá» hÆ¡n.', 'error');
+    feedback(el['upload-feedback'], 'Dung lượng không đủ. Xóa vĩnh viễn tài liệu trong thùng rác hoặc chọn tệp nhỏ hơn.', 'error');
     return;
   }
   selectedFile = file;
   el['selected-name'].textContent = file.name;
-  el['selected-meta'].textContent = `${file.type} Â· ${formatSize(file.size)}`;
+  el['selected-meta'].textContent = `${file.type} · ${formatSize(file.size)}`;
   el['selected-file'].hidden = false;
   updateControls();
 }
@@ -423,7 +423,7 @@ function fileKind(file) {
 
 function updateMetrics() {
   if (!currentUser) {
-    for (const id of ['stat-total','stat-size','stat-docs','stat-images']) el[id].textContent = 'â€”';
+    for (const id of ['stat-total','stat-size','stat-docs','stat-images']) el[id].textContent = '—';
     return;
   }
   el['stat-total'].textContent = String(currentFiles.length);
@@ -511,7 +511,7 @@ function renderFiles(files, capturedGeneration, uid, capturedView = viewGenerati
     const emailInitial = ((libraryView === 'shared' ? file.ownerEmail : currentUser?.email) || 'M').charAt(0).toUpperCase();
     ownerAvatar.textContent = emailInitial;
     const ownerName = document.createElement('span');
-    ownerName.textContent = libraryView === 'shared' ? file.ownerEmail || 'Chá»§ sá»Ÿ há»¯u' : 'TÃ´i';
+    ownerName.textContent = libraryView === 'shared' ? file.ownerEmail || 'Chủ sở hữu' : 'Tôi';
     ownerWrap.append(ownerAvatar, ownerName);
     ownerCell.append(ownerWrap);
 
@@ -520,7 +520,7 @@ function renderFiles(files, capturedGeneration, uid, capturedView = viewGenerati
     accessCell.className = 'td-access';
     const accessBadge = document.createElement('span');
     accessBadge.className = 'access-badge';
-    accessBadge.textContent = libraryView === 'shared' ? 'Chá»‰ xem / táº£i' : libraryView === 'trash' ? 'ÄÃ£ ngá»«ng chia sáº»' : file.shareCount > 0 ? `ÄÃ£ chia sáº» (${file.shareCount})` : 'RiÃªng tÆ°';
+    accessBadge.textContent = libraryView === 'shared' ? 'Chỉ xem / tải' : libraryView === 'trash' ? 'Đã ngừng chia sẻ' : file.shareCount > 0 ? `Đã chia sẻ (${file.shareCount})` : 'Riêng tư';
     accessCell.append(accessBadge);
 
     // Action cell (hidden actions on hover or via context)
@@ -529,18 +529,18 @@ function renderFiles(files, capturedGeneration, uid, capturedView = viewGenerati
     actions.className = 'file-actions';
     if (libraryView === 'trash') {
       actions.append(
-        fileAction('KhÃ´i phá»¥c', (event) => void restoreOwnedFile(file, event.currentTarget, capturedGeneration, uid, capturedView), { iconName: 'ic-refresh' }),
-        fileAction('XÃ³a vÄ©nh viá»…n', (event) => void deleteFile(file, event.currentTarget, capturedGeneration, uid, capturedView, true), { danger: true, iconName: 'ic-trash' }),
+        fileAction('Khôi phục', (event) => void restoreOwnedFile(file, event.currentTarget, capturedGeneration, uid, capturedView), { iconName: 'ic-refresh' }),
+        fileAction('Xóa vĩnh viễn', (event) => void deleteFile(file, event.currentTarget, capturedGeneration, uid, capturedView, true), { danger: true, iconName: 'ic-trash' }),
       );
     } else {
-      actions.append(fileAction('Xem trÆ°á»›c', (event) => void openPreview(file, capturedGeneration, uid, capturedView), { iconName: 'ic-eye' }));
-      actions.append(fileAction('Táº£i xuá»‘ng', (event) => void downloadOwnedFile(file, event.currentTarget, capturedGeneration, uid, capturedView), { iconName: 'ic-arrow' }));
+      actions.append(fileAction('Xem trước', (event) => void openPreview(file, capturedGeneration, uid, capturedView), { iconName: 'ic-eye' }));
+      actions.append(fileAction('Tải xuống', (event) => void downloadOwnedFile(file, event.currentTarget, capturedGeneration, uid, capturedView), { iconName: 'ic-arrow' }));
       if (libraryView === 'own') {
         actions.append(
-          fileAction('Äá»•i tÃªn', () => void openManager('rename-file', file), { iconName: 'ic-files' }),
-          fileAction('Di chuyá»ƒn', () => void openManager('move-file', file), { iconName: 'ic-folder' }),
-          fileAction('Chia sáº»', (event) => void openShareDialog(file, capturedGeneration, uid, capturedView), { iconName: 'ic-share' }),
-          fileAction('VÃ o thÃ¹ng rÃ¡c', (event) => void deleteFile(file, event.currentTarget, capturedGeneration, uid, capturedView, false), { danger: true, iconName: 'ic-trash' }),
+          fileAction('Đổi tên', () => void openManager('rename-file', file), { iconName: 'ic-files' }),
+          fileAction('Di chuyển', () => void openManager('move-file', file), { iconName: 'ic-folder' }),
+          fileAction('Chia sẻ', (event) => void openShareDialog(file, capturedGeneration, uid, capturedView), { iconName: 'ic-share' }),
+          fileAction('Vào thùng rác', (event) => void deleteFile(file, event.currentTarget, capturedGeneration, uid, capturedView, false), { danger: true, iconName: 'ic-trash' }),
         );
       }
     }
@@ -555,19 +555,19 @@ function renderFiles(files, capturedGeneration, uid, capturedView = viewGenerati
 
 function applyFileFilters() {
   if (!currentUser) return;
-  el['file-results-label'].textContent = `${currentFiles.length} / ${serverTotal} tÃ i liá»‡u Â· Trang ${currentPage + 1}`;
+  el['file-results-label'].textContent = `${currentFiles.length} / ${serverTotal} tài liệu · Trang ${currentPage + 1}`;
   renderFiles(currentFiles, generation, currentUser.uid);
   updateSearchScope();
   if (currentFiles.length) {
     el['files-empty'].hidden = true;
     el['files-table-wrap'].hidden = false;
   } else if (el['file-search'].value.trim() || el['file-filter'].value !== 'all') {
-    showEmpty('KhÃ´ng tÃ¬m tháº¥y tÃ i liá»‡u phÃ¹ há»£p', 'Thá»­ tá»« khÃ³a khÃ¡c hoáº·c bá» bá»™ lá»c. Káº¿t quáº£ Ä‘Æ°á»£c tÃ¬m trong toÃ n bá»™ danh sÃ¡ch Ä‘Ã£ chá»n.');
+    showEmpty('Không tìm thấy tài liệu phù hợp', 'Thử từ khóa khác hoặc bỏ bộ lọc. Kết quả được tìm trong toàn bộ danh sách đã chọn.');
   } else {
     const emptyStates = {
-      own: ['ThÆ° má»¥c chÆ°a cÃ³ tÃ i liá»‡u', 'Táº¡o thÆ° má»¥c hoáº·c táº£i tÃ i liá»‡u vÃ o thÆ° má»¥c Ä‘ang má»Ÿ.'],
-      shared: ['ChÆ°a cÃ³ tÃ i liá»‡u Ä‘Æ°á»£c chia sáº»', 'TÃ i liá»‡u sáº½ xuáº¥t hiá»‡n khi chá»§ sá»Ÿ há»¯u chia sáº» cho email tÃ i khoáº£n cá»§a báº¡n.'],
-      trash: ['ThÃ¹ng rÃ¡c Ä‘ang trá»‘ng', 'TÃ i liá»‡u báº¡n Ä‘Æ°a vÃ o thÃ¹ng rÃ¡c sáº½ xuáº¥t hiá»‡n á»Ÿ Ä‘Ã¢y.'],
+      own: ['Thư mục chưa có tài liệu', 'Tạo thư mục hoặc tải tài liệu vào thư mục đang mở.'],
+      shared: ['Chưa có tài liệu được chia sẻ', 'Tài liệu sẽ xuất hiện khi chủ sở hữu chia sẻ cho email tài khoản của bạn.'],
+      trash: ['Thùng rác đang trống', 'Tài liệu bạn đưa vào thùng rác sẽ xuất hiện ở đây.'],
     };
     showEmpty(...emptyStates[libraryView]);
   }
@@ -576,8 +576,8 @@ function applyFileFilters() {
 function updateSearchScope() {
   const searching = Boolean(el['file-search'].value.trim());
   el['search-scope'].textContent = libraryView === 'own'
-    ? (searching ? 'TÃ¬m trong toÃ n bá»™ tÃ i liá»‡u cá»§a tÃ´i, bao gá»“m má»i thÆ° má»¥c.' : 'Äang xem tÃ i liá»‡u trá»±c tiáº¿p trong thÆ° má»¥c Ä‘ang má»Ÿ.')
-    : libraryView === 'shared' ? 'TÃ¬m, lá»c vÃ  sáº¯p xáº¿p trÃªn toÃ n bá»™ tÃ i liá»‡u Ä‘Æ°á»£c chia sáº» vá»›i tÃ´i.' : 'TÃ¬m, lá»c vÃ  sáº¯p xáº¿p trÃªn toÃ n bá»™ thÃ¹ng rÃ¡c.';
+    ? (searching ? 'Tìm trong toàn bộ tài liệu của tôi, bao gồm mọi thư mục.' : 'Đang xem tài liệu trực tiếp trong thư mục đang mở.')
+    : libraryView === 'shared' ? 'Tìm, lọc và sắp xếp trên toàn bộ tài liệu được chia sẻ với tôi.' : 'Tìm, lọc và sắp xếp trên toàn bộ thùng rác.';
   el['folder-list'].hidden = libraryView !== 'own' || searching;
 }
 
@@ -596,7 +596,7 @@ function changeQuery(immediate = false) {
   currentFiles = [];
   el['files-body'].replaceChildren();
   el.pagination.hidden = true;
-  showEmpty('Äang tÃ¬m tÃ i liá»‡uâ€¦', 'Káº¿t quáº£ Ä‘ang Ä‘Æ°á»£c cáº­p nháº­t.');
+  showEmpty('Đang tìm tài liệu…', 'Kết quả đang được cập nhật.');
   updateSearchScope();
   updateControls();
   const capturedGeneration = generation;
@@ -614,7 +614,7 @@ async function loadFilePage() {
   const request = ++listRequest;
   const capturedView = viewGeneration;
   listBusy = true;
-  feedback(el['files-feedback'], 'Äang láº¥y danh sÃ¡ch tá»‡pâ€¦', 'neutral');
+  feedback(el['files-feedback'], 'Đang lấy danh sách tệp…', 'neutral');
   updateControls();
   try {
     if (libraryView === 'own') void loadFolderPage();
@@ -629,10 +629,10 @@ async function loadFilePage() {
     updateQuota(result.usage);
     updateMetrics();
     el['file-count'].textContent = String(files.length);
-    el['page-label'].textContent = `Trang ${currentPage + 1} Â· ${files.length} tá»‡p`;
+    el['page-label'].textContent = `Trang ${currentPage + 1} · ${files.length} tệp`;
     el.pagination.hidden = files.length === 0 && currentPage === 0 && !nextPageToken;
     applyFileFilters();
-    if (!files.length && currentPage > 0) showEmpty('Trang nÃ y chÆ°a cÃ³ tá»‡p', 'Quay vá» trang trÆ°á»›c hoáº·c lÃ m má»›i danh sÃ¡ch.');
+    if (!files.length && currentPage > 0) showEmpty('Trang này chưa có tệp', 'Quay về trang trước hoặc làm mới danh sách.');
     feedback(el['files-feedback']);
     return true;
   } catch (error) {
@@ -640,12 +640,12 @@ async function loadFilePage() {
     nextPageToken = undefined;
     currentFiles = [];
     updateQuota();
-    el['quota-message'].textContent = 'ChÆ°a xÃ¡c Ä‘á»‹nh Ä‘Æ°á»£c dung lÆ°á»£ng. HÃ£y lÃ m má»›i danh sÃ¡ch.';
+    el['quota-message'].textContent = 'Chưa xác định được dung lượng. Hãy làm mới danh sách.';
     updateMetrics();
-    el['file-results-label'].textContent = 'ChÆ°a thá»ƒ táº£i danh sÃ¡ch';
+    el['file-results-label'].textContent = 'Chưa thể tải danh sách';
     el['files-body'].replaceChildren();
     el['file-count'].textContent = '0';
-    showEmpty('ChÆ°a táº£i Ä‘Æ°á»£c danh sÃ¡ch', 'Kiá»ƒm tra káº¿t ná»‘i rá»“i chá»n LÃ m má»›i.');
+    showEmpty('Chưa tải được danh sách', 'Kiểm tra kết nối rồi chọn Làm mới.');
     feedback(el['files-feedback'], friendlyError(error), 'error');
     return false;
   } finally {
@@ -660,7 +660,7 @@ async function downloadOwnedFile(file, button, capturedGeneration, uid, captured
   if (!sameLibrary(capturedGeneration, uid, capturedView)) return;
   const request = ++downloadRequest;
   button.disabled = true;
-  feedback(el['download-feedback'], `Äang táº£i ${file.name}â€¦`, 'neutral');
+  feedback(el['download-feedback'], `Đang tải ${file.name}…`, 'neutral');
   try {
     const blob = await downloadFile(file.fullPath, libraryView === 'shared' ? file.ownerUid : null);
     if (!sameLibrary(capturedGeneration, uid, capturedView) || request !== downloadRequest) return;
@@ -673,7 +673,7 @@ async function downloadOwnedFile(file, button, capturedGeneration, uid, captured
     link.click();
     link.remove();
     setTimeout(() => URL.revokeObjectURL(localURL), 1000);
-    feedback(el['download-feedback'], `ÄÃ£ gá»­i ${link.download} tá»›i trÃ¬nh duyá»‡t Ä‘á»ƒ lÆ°u.`);
+    feedback(el['download-feedback'], `Đã gửi ${link.download} tới trình duyệt để lưu.`);
   } catch (error) {
     if (sameLibrary(capturedGeneration, uid, capturedView) && request === downloadRequest) feedback(el['download-feedback'], friendlyError(error), 'error');
   } finally {
@@ -684,12 +684,12 @@ async function downloadOwnedFile(file, button, capturedGeneration, uid, captured
 async function confirmDeletion(file, permanent) {
   const dialog = el['delete-dialog'];
   const description = permanent
-    ? 'TÃ i liá»‡u sáº½ bá»‹ xÃ³a vÄ©nh viá»…n vÃ  khÃ´ng thá»ƒ khÃ´i phá»¥c.'
-    : 'TÃ i liá»‡u váº«n chiáº¿m dung lÆ°á»£ng vÃ  cÃ³ thá»ƒ khÃ´i phá»¥c. Má»i quyá»n chia sáº» sáº½ bá»‹ thu há»“i.';
+    ? 'Tài liệu sẽ bị xóa vĩnh viễn và không thể khôi phục.'
+    : 'Tài liệu vẫn chiếm dung lượng và có thể khôi phục. Mọi quyền chia sẻ sẽ bị thu hồi.';
   if (typeof dialog.showModal !== 'function') return window.confirm(description);
-  document.getElementById('delete-heading').textContent = permanent ? 'XÃ³a vÄ©nh viá»…n tÃ i liá»‡u?' : 'Chuyá»ƒn vÃ o thÃ¹ng rÃ¡c?';
+  document.getElementById('delete-heading').textContent = permanent ? 'Xóa vĩnh viễn tài liệu?' : 'Chuyển vào thùng rác?';
   document.getElementById('delete-description').textContent = description;
-  document.getElementById('confirm-delete').textContent = permanent ? 'XÃ³a vÄ©nh viá»…n' : 'Chuyá»ƒn vÃ o thÃ¹ng rÃ¡c';
+  document.getElementById('confirm-delete').textContent = permanent ? 'Xóa vĩnh viễn' : 'Chuyển vào thùng rác';
   el['delete-filename'].textContent = displayFileName(file);
   dialog.returnValue = 'cancel';
   return new Promise(resolve => {
@@ -714,8 +714,8 @@ async function deleteFile(file, button, capturedGeneration, uid, capturedView, p
     resetPagination();
     const reloaded = await loadFilePage();
     if (sameLibrary(capturedGeneration, uid, capturedView) && reloaded) feedback(el['files-feedback'], permanent
-      ? `ÄÃ£ xÃ³a vÄ©nh viá»…n ${displayFileName(file)}.`
-      : `ÄÃ£ chuyá»ƒn ${displayFileName(file)} vÃ o thÃ¹ng rÃ¡c vÃ  thu há»“i quyá»n chia sáº».`);
+      ? `Đã xóa vĩnh viễn ${displayFileName(file)}.`
+      : `Đã chuyển ${displayFileName(file)} vào thùng rác và thu hồi quyền chia sẻ.`);
   } catch (error) {
     if (sameLibrary(capturedGeneration, uid, capturedView)) feedback(el['files-feedback'], friendlyError(error), 'error');
   } finally {
@@ -731,7 +731,7 @@ async function restoreOwnedFile(file, button, capturedGeneration, uid, capturedV
     if (!sameLibrary(capturedGeneration, uid, capturedView)) return;
     resetPagination();
     await loadFilePage();
-    if (sameLibrary(capturedGeneration, uid, capturedView)) feedback(el['files-feedback'], `ÄÃ£ khÃ´i phá»¥c ${displayFileName(file)} vá» tÃ i liá»‡u riÃªng tÆ°. Quyá»n chia sáº» cÅ© khÃ´ng Ä‘Æ°á»£c khÃ´i phá»¥c.`);
+    if (sameLibrary(capturedGeneration, uid, capturedView)) feedback(el['files-feedback'], `Đã khôi phục ${displayFileName(file)} về tài liệu riêng tư. Quyền chia sẻ cũ không được khôi phục.`);
   } catch (error) {
     if (sameLibrary(capturedGeneration, uid, capturedView)) feedback(el['files-feedback'], friendlyError(error), 'error');
   } finally {
@@ -756,7 +756,7 @@ function renderShares(shares, context) {
   if (!shares.length) {
     const empty = document.createElement('li');
     empty.className = 'share-empty';
-    empty.textContent = 'ChÆ°a chia sáº» tÃ i liá»‡u nÃ y vá»›i ai.';
+    empty.textContent = 'Chưa chia sẻ tài liệu này với ai.';
     fragment.append(empty);
   }
   for (const share of shares) {
@@ -766,10 +766,10 @@ function renderShares(shares, context) {
     const email = document.createElement('strong');
     email.textContent = share.email;
     const permission = document.createElement('span');
-    permission.textContent = 'Xem vÃ  táº£i xuá»‘ng';
+    permission.textContent = 'Xem và tải xuống';
     details.append(email, permission);
-    const button = fileAction('Thu há»“i', () => void removeRecipient(share, context), { danger: true });
-    button.setAttribute('aria-label', `Thu há»“i: ${share.email}`);
+    const button = fileAction('Thu hồi', () => void removeRecipient(share, context), { danger: true });
+    button.setAttribute('aria-label', `Thu hồi: ${share.email}`);
     item.append(details, button);
     fragment.append(item);
   }
@@ -786,7 +786,7 @@ async function loadShares(context) {
   const request = ++shareRequest;
   shareBusy = true;
   updateShareControls();
-  feedback(el['share-feedback'], 'Äang láº¥y danh sÃ¡ch ngÆ°á»i nháº­nâ€¦', 'neutral');
+  feedback(el['share-feedback'], 'Đang lấy danh sách người nhận…', 'neutral');
   try {
     const shares = await getShares(context.file.fullPath);
     if (!currentShareContext(context) || request !== shareRequest) return false;
@@ -822,7 +822,7 @@ async function removeRecipient(share, context) {
   try {
     await revokeShare(context.file.fullPath, share.recipientUid);
     if (!currentShareContext(context)) return;
-    if (await loadShares(context)) feedback(el['share-feedback'], `ÄÃ£ thu há»“i quyá»n cá»§a ${share.email}.`);
+    if (await loadShares(context)) feedback(el['share-feedback'], `Đã thu hồi quyền của ${share.email}.`);
   } catch (error) {
     if (currentShareContext(context)) feedback(el['share-feedback'], friendlyError(error), 'error');
   } finally {
@@ -837,12 +837,12 @@ el['share-form'].addEventListener('submit', async (event) => {
   const email = el['share-email'].value.trim();
   shareBusy = true;
   updateShareControls();
-  feedback(el['share-feedback'], 'Äang cáº¥p quyá»n xem vÃ  táº£i xuá»‘ngâ€¦', 'neutral');
+  feedback(el['share-feedback'], 'Đang cấp quyền xem và tải xuống…', 'neutral');
   try {
     await grantShare(context.file.fullPath, email);
     if (!currentShareContext(context)) return;
     el['share-email'].value = '';
-    if (await loadShares(context)) feedback(el['share-feedback'], `ÄÃ£ chia sáº» cho ${email}.`);
+    if (await loadShares(context)) feedback(el['share-feedback'], `Đã chia sẻ cho ${email}.`);
   } catch (error) {
     if (currentShareContext(context)) feedback(el['share-feedback'], friendlyError(error), 'error');
   } finally {
@@ -879,7 +879,7 @@ el['toggle-password'].addEventListener('click', () => {
   const showing = el.password.type === 'password';
   el.password.type = showing ? 'text' : 'password';
   el['toggle-password'].setAttribute('aria-pressed', String(showing));
-  el['toggle-password'].setAttribute('aria-label', showing ? 'áº¨n máº­t kháº©u' : 'Hiá»‡n máº­t kháº©u');
+  el['toggle-password'].setAttribute('aria-label', showing ? 'Ẩn mật khẩu' : 'Hiện mật khẩu');
 });
 
 for (const link of document.querySelectorAll('.main-nav .nav-item')) {
@@ -906,19 +906,19 @@ el['auth-form'].addEventListener('submit', async (event) => {
   if (!initialized || authBusy || !el['auth-form'].reportValidity()) return;
   authBusy = true;
   const action = authMode;
-  feedback(el['auth-feedback'], action === 'login' ? 'Äang Ä‘Äƒng nháº­pâ€¦' : 'Äang táº¡o tÃ i khoáº£nâ€¦', 'neutral');
+  feedback(el['auth-feedback'], action === 'login' ? 'Đang đăng nhập…' : 'Đang tạo tài khoản…', 'neutral');
   updateControls();
   try {
     const result = await (action === 'login' ? login : register)(el.email.value.trim(), el.password.value);
     if (getCurrentUser() !== result.user) return;
     el.password.value = '';
-    feedback(el['auth-feedback'], action === 'login' ? 'ÄÄƒng nháº­p thÃ nh cÃ´ng.' : 'ÄÃ£ táº¡o tÃ i khoáº£n vÃ  Ä‘Äƒng nháº­p.');
+    feedback(el['auth-feedback'], action === 'login' ? 'Đăng nhập thành công.' : 'Đã tạo tài khoản và đăng nhập.');
     if (result.verificationEmail && !verificationConfirmed) {
       feedback(el['verification-feedback'], result.verificationEmail.sent
         ? (result.verificationEmail.mode === 'emulator'
-          ? 'ÄÃ£ táº¡o email xÃ¡c minh cá»¥c bá»™ trong Auth Emulator. Tráº¡ng thÃ¡i sáº½ tá»± cáº­p nháº­t sau khi báº¡n xÃ¡c minh.'
-          : 'ÄÃ£ tá»± Ä‘á»™ng gá»­i email xÃ¡c minh. Má»Ÿ liÃªn káº¿t trong email; tráº¡ng thÃ¡i sáº½ tá»± cáº­p nháº­t.')
-        : 'TÃ i khoáº£n Ä‘Ã£ táº¡o thÃ nh cÃ´ng nhÆ°ng chÆ°a gá»­i Ä‘Æ°á»£c email xÃ¡c minh. ' + friendlyError(result.verificationEmail.error),
+          ? 'Đã tạo email xác minh cục bộ trong Auth Emulator. Trạng thái sẽ tự cập nhật sau khi bạn xác minh.'
+          : 'Đã tự động gửi email xác minh. Mở liên kết trong email; trạng thái sẽ tự cập nhật.')
+        : 'Tài khoản đã tạo thành công nhưng chưa gửi được email xác minh. ' + friendlyError(result.verificationEmail.error),
         result.verificationEmail.sent ? 'success' : 'error');
     }
   } catch (error) {
@@ -937,7 +937,7 @@ el['signout-button'].addEventListener('click', async () => {
   try {
     await logout();
     el.password.value = '';
-    feedback(el['auth-feedback'], 'ÄÃ£ Ä‘Äƒng xuáº¥t.');
+    feedback(el['auth-feedback'], 'Đã đăng xuất.');
   } catch (error) {
     feedback(el['auth-feedback'], friendlyError(error), 'error');
   } finally {
@@ -952,12 +952,12 @@ el['verify-button'].addEventListener('click', async () => {
   const capturedGeneration = generation;
   const uid = currentUser.uid;
   el['verify-button'].disabled = true;
-  feedback(el['verify-feedback'], 'Äang xÃ¡c thá»±c vá»›i APIâ€¦', 'neutral');
+  feedback(el['verify-feedback'], 'Đang xác thực với API…', 'neutral');
   try {
     const result = await verifyWithBackend();
     if (!sameUser(capturedGeneration, uid)) return;
     const returnedUID = result?.uid || result?.user?.uid;
-    feedback(el['verify-feedback'], returnedUID ? `API Ä‘Ã£ xÃ¡c thá»±c UID: ${returnedUID}` : 'API Ä‘Ã£ xÃ¡c thá»±c ID token thÃ nh cÃ´ng.');
+    feedback(el['verify-feedback'], returnedUID ? `API đã xác thực UID: ${returnedUID}` : 'API đã xác thực ID token thành công.');
   } catch (error) {
     if (sameUser(capturedGeneration, uid)) feedback(el['verify-feedback'], friendlyError(error), 'error');
   } finally {
@@ -972,12 +972,12 @@ el['send-verification'].addEventListener('click', async () => {
   const uid = currentUser.uid;
   verificationBusy = true;
   updateVerification();
-  feedback(el['verification-feedback'], 'Äang gá»­i email xÃ¡c minhâ€¦', 'neutral');
+  feedback(el['verification-feedback'], 'Đang gửi email xác minh…', 'neutral');
   try {
     const result = await sendVerification();
     if (sameUser(capturedGeneration, uid) && !verificationConfirmed) feedback(el['verification-feedback'],
-      result.mode === 'emulator' ? 'ÄÃ£ táº¡o email xÃ¡c minh cá»¥c bá»™. Tráº¡ng thÃ¡i sáº½ tá»± cáº­p nháº­t.'
-        : 'ÄÃ£ gá»­i láº¡i email. Má»Ÿ liÃªn káº¿t trong email; tráº¡ng thÃ¡i sáº½ tá»± cáº­p nháº­t.');
+      result.mode === 'emulator' ? 'Đã tạo email xác minh cục bộ. Trạng thái sẽ tự cập nhật.'
+        : 'Đã gửi lại email. Mở liên kết trong email; trạng thái sẽ tự cập nhật.');
   } catch (error) {
     if (sameUser(capturedGeneration, uid)) feedback(el['verification-feedback'], friendlyError(error), 'error');
   } finally {
@@ -1015,7 +1015,7 @@ el['drop-zone'].addEventListener('drop', (event) => {
   if (!currentUser || uploadSession) return;
   const files = event.dataTransfer?.files;
   if (files?.length !== 1) {
-    feedback(el['upload-feedback'], 'Vui lÃ²ng chá»n má»™t tá»‡p cho má»—i lÆ°á»£t táº£i.', 'error');
+    feedback(el['upload-feedback'], 'Vui lòng chọn một tệp cho mỗi lượt tải.', 'error');
     return;
   }
   chooseFile(files[0]);
@@ -1035,9 +1035,9 @@ el['upload-button'].addEventListener('click', async () => {
   feedback(el['upload-feedback']);
   el['upload-progress'].hidden = false;
   el['progress-bar'].value = 0;
-  el['progress-label'].textContent = 'Äang táº£i lÃªnâ€¦ 0%';
+  el['progress-label'].textContent = 'Đang tải lên… 0%';
   el['cancel-upload'].disabled = false;
-  el['upload-button'].textContent = 'Äang táº£i lÃªnâ€¦';
+  el['upload-button'].textContent = 'Đang tải lên…';
   updateControls();
   try {
     const job = await uploadFile(file, (progress) => {
@@ -1045,20 +1045,20 @@ el['upload-button'].addEventListener('click', async () => {
       const percent = typeof progress === 'number' ? progress : ((progress?.bytesTransferred || 0) / (progress?.totalBytes || file.size)) * 100;
       const bounded = Math.max(0, Math.min(100, Math.round(percent)));
       el['progress-bar'].value = bounded;
-      el['progress-label'].textContent = bounded === 100 ? 'ÄÃ£ gá»­i 100% Â· MÃ¡y chá»§ Ä‘ang kiá»ƒm tra vÃ  lÆ°u tá»‡pâ€¦' : `Äang táº£i lÃªnâ€¦ ${bounded}%`;
+      el['progress-label'].textContent = bounded === 100 ? 'Đã gửi 100% · Máy chủ đang kiểm tra và lưu tệp…' : `Đang tải lên… ${bounded}%`;
     }, uploadFolderId);
     session.task = job.task;
     if (session.cancelRequested || !sameUser(capturedGeneration, uid)) session.task?.cancel();
     await job.completed;
     if (!sameUser(capturedGeneration, uid) || uploadSession !== session) return;
     clearSelectedFile();
-    feedback(el['upload-feedback'], `ÄÃ£ táº£i lÃªn ${file.name}.`);
+    feedback(el['upload-feedback'], `Đã tải lên ${file.name}.`);
     resetPagination();
     await loadFilePage();
   } catch (error) {
     if (sameUser(capturedGeneration, uid) && uploadSession === session) {
       // Retain selection for retry and reconcile an uncertain save after abort/network loss.
-      el['upload-button'].textContent = 'Thá»­ táº£i láº¡i';
+      el['upload-button'].textContent = 'Thử tải lại';
       feedback(el['upload-feedback'], friendlyError(error), error?.code === 'storage/canceled' ? 'neutral' : 'error');
       resetPagination();
       await loadFilePage();
@@ -1067,7 +1067,7 @@ el['upload-button'].addEventListener('click', async () => {
     if (uploadSession === session) {
       uploadSession = null;
       el['upload-progress'].hidden = true;
-      if (!selectedFile) el['upload-button'].textContent = 'Táº£i lÃªn ngay';
+      if (!selectedFile) el['upload-button'].textContent = 'Tải lên ngay';
       updateControls();
     }
   }
@@ -1078,7 +1078,7 @@ el['cancel-upload'].addEventListener('click', () => {
   uploadSession.cancelRequested = true;
   uploadSession.task?.cancel();
   el['cancel-upload'].disabled = true;
-  el['progress-label'].textContent = 'Äang há»§y táº£iâ€¦';
+  el['progress-label'].textContent = 'Đang hủy tải…';
 });
 el['refresh-button'].addEventListener('click', () => {
   resetPagination();
@@ -1110,7 +1110,7 @@ function renderBreadcrumbs() {
   const capturedGeneration = generation;
   const capturedView = viewGeneration;
   const uid = currentUser?.uid;
-  for (const folder of [{ id: null, name: 'TÃ i liá»‡u cá»§a tÃ´i' }, ...folderBreadcrumbs]) {
+  for (const folder of [{ id: null, name: 'Tài liệu của tôi' }, ...folderBreadcrumbs]) {
     if (fragment.childNodes.length) {
       const separator = document.createElement('span');
       separator.textContent = '/';
@@ -1128,8 +1128,8 @@ function renderBreadcrumbs() {
     fragment.append(button);
   }
   el['folder-breadcrumbs'].replaceChildren(fragment);
-  const destination = folderBreadcrumbs.at(-1)?.name || 'ThÆ° má»¥c gá»‘c';
-  document.getElementById('upload-help').textContent = '10 MiB/tá»‡p Â· 50 MiB/tÃ i khoáº£n Â· Táº£i vÃ o: ' + (libraryView === 'own' ? destination : 'ThÆ° má»¥c gá»‘c') + '.';
+  const destination = folderBreadcrumbs.at(-1)?.name || 'Thư mục gốc';
+  document.getElementById('upload-help').textContent = '10 MiB/tệp · 50 MiB/tài khoản · Tải vào: ' + (libraryView === 'own' ? destination : 'Thư mục gốc') + '.';
 }
 
 function renderFolders() {
@@ -1144,14 +1144,14 @@ function renderFolders() {
       if (sameLibrary(capturedGeneration, uid, capturedView)) navigateFolder(folder.id);
     }, { iconName: 'ic-folder' });
     open.className = 'folder-open';
-    open.setAttribute('aria-label', 'Má»Ÿ thÆ° má»¥c: ' + folder.name);
+    open.setAttribute('aria-label', 'Mở thư mục: ' + folder.name);
     const actions = document.createElement('div');
     actions.className = 'folder-actions';
-    for (const [kind, label] of [['rename-folder', 'Äá»•i tÃªn'], ['move-folder', 'Di chuyá»ƒn'], ['delete-folder', 'XÃ³a thÆ° má»¥c trá»‘ng']]) {
+    for (const [kind, label] of [['rename-folder', 'Đổi tên'], ['move-folder', 'Di chuyển'], ['delete-folder', 'Xóa thư mục trống']]) {
       const button = fileAction(label, () => {
         if (sameLibrary(capturedGeneration, uid, capturedView)) void openManager(kind, folder);
       }, { danger: kind === 'delete-folder' });
-      button.setAttribute('aria-label', label + ' thÆ° má»¥c: ' + folder.name);
+      button.setAttribute('aria-label', label + ' thư mục: ' + folder.name);
       actions.append(button);
     }
     card.append(open, actions);
@@ -1243,7 +1243,7 @@ function fillFolderChoices(folders, context) {
   }).map(folder => ({ id: folder.id, path: folderPath(folder, map) }))
     .sort((a, b) => a.path.localeCompare(b.path, 'vi'));
   const fragment = document.createDocumentFragment();
-  for (const choice of [{ id: '', path: 'ThÆ° má»¥c gá»‘c' }, ...choices]) {
+  for (const choice of [{ id: '', path: 'Thư mục gốc' }, ...choices]) {
     const option = document.createElement('option');
     option.value = choice.id;
     option.textContent = choice.path;
@@ -1258,27 +1258,27 @@ async function openManager(kind, item = null) {
   closeManager();
   const context = { kind, item, parentId: currentFolderId, generation, uid: currentUser.uid, viewGeneration };
   managerContext = context;
-  const titles = { 'new-folder': 'Táº¡o thÆ° má»¥c', 'rename-folder': 'Äá»•i tÃªn thÆ° má»¥c', 'move-folder': 'Di chuyá»ƒn thÆ° má»¥c', 'delete-folder': 'XÃ³a thÆ° má»¥c trá»‘ng', 'rename-file': 'Äá»•i tÃªn tÃ i liá»‡u', 'move-file': 'Di chuyá»ƒn tÃ i liá»‡u' };
+  const titles = { 'new-folder': 'Tạo thư mục', 'rename-folder': 'Đổi tên thư mục', 'move-folder': 'Di chuyển thư mục', 'delete-folder': 'Xóa thư mục trống', 'rename-file': 'Đổi tên tài liệu', 'move-file': 'Di chuyển tài liệu' };
   const moving = kind.startsWith('move-');
   const naming = kind === 'new-folder' || kind.startsWith('rename-');
   el['manager-heading'].textContent = titles[kind];
   el['manager-description'].textContent = kind === 'delete-folder'
-    ? 'Chá»‰ xÃ³a Ä‘Æ°á»£c thÆ° má»¥c khÃ´ng chá»©a thÆ° má»¥c con hay tÃ i liá»‡u, ká»ƒ cáº£ tÃ i liá»‡u trong thÃ¹ng rÃ¡c.'
-    : kind === 'new-folder' ? 'ThÆ° má»¥c chá»‰ tá»• chá»©c tÃ i liá»‡u. Quyá»n chia sáº» Ä‘Æ°á»£c cáº¥p riÃªng cho tá»«ng tÃ i liá»‡u.'
-    : 'Äá»•i tÃªn hoáº·c di chuyá»ƒn sáº½ giá»¯ nguyÃªn tÃ i liá»‡u vÃ  quyá»n chia sáº» Ä‘Ã£ cáº¥p.';
+    ? 'Chỉ xóa được thư mục không chứa thư mục con hay tài liệu, kể cả tài liệu trong thùng rác.'
+    : kind === 'new-folder' ? 'Thư mục chỉ tổ chức tài liệu. Quyền chia sẻ được cấp riêng cho từng tài liệu.'
+    : 'Đổi tên hoặc di chuyển sẽ giữ nguyên tài liệu và quyền chia sẻ đã cấp.';
   el['manager-name-field'].hidden = !naming;
   el['manager-name'].required = naming;
   el['manager-name'].value = kind === 'new-folder' ? '' : item ? (kind.endsWith('-file') ? displayFileName(item) : item.name) : '';
   el['manager-target-field'].hidden = !moving;
   el['manager-target'].required = false;
-  el['manager-submit'].textContent = kind === 'delete-folder' ? 'XÃ³a thÆ° má»¥c trá»‘ng' : kind === 'new-folder' ? 'Táº¡o thÆ° má»¥c' : 'LÆ°u thay Ä‘á»•i';
+  el['manager-submit'].textContent = kind === 'delete-folder' ? 'Xóa thư mục trống' : kind === 'new-folder' ? 'Tạo thư mục' : 'Lưu thay đổi';
   el['manager-submit'].classList.toggle('button-danger', kind === 'delete-folder');
   el['manager-submit'].classList.toggle('button-primary', kind !== 'delete-folder');
   managerBusy = moving;
   updateManagerControls();
   el['manager-dialog'].showModal();
   if (moving) {
-    feedback(el['manager-feedback'], 'Äang láº¥y danh sÃ¡ch thÆ° má»¥câ€¦', 'neutral');
+    feedback(el['manager-feedback'], 'Đang lấy danh sách thư mục…', 'neutral');
     try {
       const data = await listFolders(null, true);
       if (!currentManagerContext(context)) return;
@@ -1286,7 +1286,7 @@ async function openManager(kind, item = null) {
       feedback(el['manager-feedback']);
     } catch (error) {
       if (currentManagerContext(context)) {
-        feedback(el['manager-feedback'], friendlyError(error) + ' ÄÃ³ng vÃ  má»Ÿ láº¡i Ä‘á»ƒ thá»­ láº¡i.', 'error');
+        feedback(el['manager-feedback'], friendlyError(error) + ' Đóng và mở lại để thử lại.', 'error');
         return;
       }
     } finally {
@@ -1303,7 +1303,7 @@ el['manager-form'].addEventListener('submit', async event => {
   if (context.kind.startsWith('move-') && !el['manager-target'].options.length) return;
   managerBusy = true;
   updateManagerControls();
-  feedback(el['manager-feedback'], 'Äang lÆ°u thay Ä‘á»•iâ€¦', 'neutral');
+  feedback(el['manager-feedback'], 'Đang lưu thay đổi…', 'neutral');
   const name = el['manager-name'].value.trim();
   const target = el['manager-target'].value || null;
   try {
@@ -1317,7 +1317,7 @@ el['manager-form'].addEventListener('submit', async event => {
     closeManager();
     resetPagination();
     await loadFilePage();
-    if (sameLibrary(context.generation, context.uid, context.viewGeneration)) feedback(el['files-feedback'], 'ÄÃ£ lÆ°u thay Ä‘á»•i.');
+    if (sameLibrary(context.generation, context.uid, context.viewGeneration)) feedback(el['files-feedback'], 'Đã lưu thay đổi.');
   } catch (error) {
     if (currentManagerContext(context)) feedback(el['manager-feedback'], friendlyError(error), 'error');
   } finally {
@@ -1352,12 +1352,12 @@ async function openPreview(file, capturedGeneration, uid, capturedView) {
   previewContext = context;
   el['preview-heading'].textContent = displayFileName(file);
   el['preview-download'].disabled = true;
-  feedback(el['preview-feedback'], 'Äang táº£i báº£n xem trÆ°á»›câ€¦', 'neutral');
+  feedback(el['preview-feedback'], 'Đang tải bản xem trước…', 'neutral');
   el['preview-dialog'].showModal();
   try {
     const blob = await previewFile(file.fullPath, context.ownerUid);
     if (!currentPreviewContext(context)) return;
-    if (!['application/pdf', 'image/jpeg', 'image/png', 'image/webp'].includes(blob.type)) throw new Error('Äá»‹nh dáº¡ng nÃ y chÆ°a há»— trá»£ xem trÆ°á»›c.');
+    if (!['application/pdf', 'image/jpeg', 'image/png', 'image/webp'].includes(blob.type)) throw new Error('Định dạng này chưa hỗ trợ xem trước.');
     let content;
     if (blob.type === 'application/pdf') {
       const { createPdfPreview } = await import('./pdf-preview.js');
@@ -1368,12 +1368,12 @@ async function openPreview(file, capturedGeneration, uid, capturedView) {
     } else {
       previewObjectURL = URL.createObjectURL(blob);
       content = document.createElement('img');
-      content.alt = 'Xem trÆ°á»›c: ' + displayFileName(file);
+      content.alt = 'Xem trước: ' + displayFileName(file);
       content.src = previewObjectURL;
     }
     if (content) { content.className = 'preview-document'; el['preview-content'].replaceChildren(content); }
     el['preview-download'].disabled = false;
-    feedback(el['preview-feedback'], 'Báº£n xem trÆ°á»›c Ä‘Æ°á»£c táº£i báº±ng quyá»n truy cáº­p hiá»‡n táº¡i cá»§a báº¡n.');
+    feedback(el['preview-feedback'], 'Bản xem trước được tải bằng quyền truy cập hiện tại của bạn.');
   } catch (error) {
     if (currentPreviewContext(context)) feedback(el['preview-feedback'], friendlyError(error), 'error');
   }
@@ -1410,13 +1410,13 @@ el['reset-form'].addEventListener('submit', async event => {
   resetBusy = true;
   el['reset-submit'].disabled = true;
   el['reset-email'].disabled = true;
-  feedback(el['reset-feedback'], 'Äang xá»­ lÃ½ yÃªu cáº§uâ€¦', 'neutral');
+  feedback(el['reset-feedback'], 'Đang xử lý yêu cầu…', 'neutral');
   try {
     const result = await resetPassword(el['reset-email'].value.trim());
     if (generation !== capturedGeneration || request !== resetRequest || currentUser || !el['reset-dialog'].open) return;
     feedback(el['reset-feedback'], result.mode === 'emulator'
-      ? 'Náº¿u email Ä‘Ã£ Ä‘Äƒng kÃ½, yÃªu cáº§u Ä‘áº·t láº¡i máº­t kháº©u Ä‘Ã£ Ä‘Æ°á»£c táº¡o. Khi cháº¡y cá»¥c bá»™, má»Ÿ Auth Emulator UI Ä‘á»ƒ kiá»ƒm tra email thá»­ nghiá»‡m.'
-      : 'Náº¿u email Ä‘Ã£ Ä‘Äƒng kÃ½, báº¡n sáº½ nháº­n Ä‘Æ°á»£c hÆ°á»›ng dáº«n Ä‘áº·t láº¡i máº­t kháº©u. HÃ£y kiá»ƒm tra há»™p thÆ° vÃ  thÆ° rÃ¡c.');
+      ? 'Nếu email đã đăng ký, yêu cầu đặt lại mật khẩu đã được tạo. Khi chạy cục bộ, mở Auth Emulator UI để kiểm tra email thử nghiệm.'
+      : 'Nếu email đã đăng ký, bạn sẽ nhận được hướng dẫn đặt lại mật khẩu. Hãy kiểm tra hộp thư và thư rác.');
   } catch (error) {
     if (generation === capturedGeneration && request === resetRequest && !currentUser && el['reset-dialog'].open) feedback(el['reset-feedback'], friendlyError(error), 'error');
   } finally {
@@ -1445,20 +1445,20 @@ try {
       verificationConfirmed = true;
       verificationBusy = false;
       updateVerification();
-      feedback(el['verification-feedback'], 'Email Ä‘Ã£ Ä‘Æ°á»£c xÃ¡c minh. Quyá»n truy cáº­p Ä‘Ã£ Ä‘Æ°á»£c cáº­p nháº­t tá»± Ä‘á»™ng.');
+      feedback(el['verification-feedback'], 'Email đã được xác minh. Quyền truy cập đã được cập nhật tự động.');
     },
     onError: (error, user) => {
       if (currentUser === user && !verificationConfirmed) feedback(el['verification-feedback'],
-        'ChÆ°a Ä‘á»“ng bá»™ Ä‘Æ°á»£c tráº¡ng thÃ¡i xÃ¡c minh. á»¨ng dá»¥ng sáº½ tá»± thá»­ láº¡i khi cÃ³ káº¿t ná»‘i.', 'neutral');
+        'Chưa đồng bộ được trạng thái xác minh. Ứng dụng sẽ tự thử lại khi có kết nối.', 'neutral');
     },
   });
   ({ uploadFile, listFiles, downloadFile, previewFile, removeFile, trashFile, restoreFile, getShares, grantShare, revokeShare, listFolders, createFolder, updateFolder, deleteFolder, updateFile, createUploadQueue, downloadFileWithProgress } = files);
   const mode = String(config.mode || 'firebase');
   cloudMode = mode === 'cloud';
-  el['environment-label'].textContent = /emulator/i.test(mode) ? 'Firebase Emulator Â· Cá»¥c bá»™' : 'Firebase Â· Trá»±c tiáº¿p';
+  el['environment-label'].textContent = /emulator/i.test(mode) ? 'Firebase Emulator · Cục bộ' : 'Firebase · Trực tiếp';
   el['environment-dot'].classList.add('ready');
-  el['project-id'].textContent = config.projectId || 'â€”';
-  el['bucket-name'].textContent = config.bucket || 'â€”';
+  el['project-id'].textContent = config.projectId || '—';
+  el['bucket-name'].textContent = config.bucket || '—';
   initialized = true;
   switchAuthMode('login');
   updateControls();
@@ -1466,9 +1466,9 @@ try {
 } catch {
   initialized = false;
   updateControls();
-  el['environment-label'].textContent = 'ChÆ°a káº¿t ná»‘i';
+  el['environment-label'].textContent = 'Chưa kết nối';
   el['environment-dot'].classList.add('error');
-  el['boot-error'].textContent = 'ChÆ°a khá»Ÿi táº¡o Ä‘Æ°á»£c Firebase. Kiá»ƒm tra káº¿t ná»‘i internet Ä‘á»ƒ táº£i Web SDK, cáº¥u hÃ¬nh frontend vÃ  dá»‹ch vá»¥ emulator (náº¿u dÃ¹ng). Sau khi sá»­a, táº£i láº¡i trang. Xem README Ä‘á»ƒ cháº¡y demo báº±ng HTTP; khÃ´ng má»Ÿ trá»±c tiáº¿p báº±ng file://.';
+  el['boot-error'].textContent = 'Chưa khởi tạo được Firebase. Kiểm tra kết nối internet để tải Web SDK, cấu hình frontend và dịch vụ emulator (nếu dùng). Sau khi sửa, tải lại trang. Xem README để chạy demo bằng HTTP; không mở trực tiếp bằng file://.';
   el['boot-error'].hidden = false;
 }
 
