@@ -4,7 +4,7 @@ let verificationSync = null;
 let verificationConfirmed = false;
 let verificationCooldownTimer = null;
 let uploadFile, listFiles, downloadFile, previewFile, removeFile, trashFile, restoreFile, getShares, grantShare, revokeShare, listFolders, createFolder, updateFolder, deleteFolder, updateFile;
-let createUploadQueue, downloadFileWithProgress;
+let createUploadQueue;
 
 const $ = (id) => document.getElementById(id);
 const el = Object.fromEntries([
@@ -662,18 +662,11 @@ async function downloadOwnedFile(file, button, capturedGeneration, uid, captured
   button.disabled = true;
   feedback(el['download-feedback'], `Đang tải ${file.name}…`, 'neutral');
   try {
-    const blob = await downloadFile(file.fullPath, libraryView === 'shared' ? file.ownerUid : null);
-    if (!sameLibrary(capturedGeneration, uid, capturedView) || request !== downloadRequest) return;
-    const localURL = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = localURL;
-    link.download = displayFileName(file);
-    link.hidden = true;
-    document.body.append(link);
-    link.click();
-    link.remove();
-    setTimeout(() => URL.revokeObjectURL(localURL), 1000);
-    feedback(el['download-feedback'], `Đã gửi ${link.download} tới trình duyệt để lưu.`);
+    const started = await downloadFile(file.fullPath, libraryView === 'shared' ? file.ownerUid : null, {
+      shouldStart: () => sameLibrary(capturedGeneration, uid, capturedView) && request === downloadRequest,
+      onError: error => feedback(el['download-feedback'], friendlyError(error), 'error'),
+    });
+    if (started) feedback(el['download-feedback'], `Đã gửi yêu cầu tải ${displayFileName(file)} tới máy chủ. Trình duyệt sẽ lưu tệp khi máy chủ phản hồi.`);
   } catch (error) {
     if (sameLibrary(capturedGeneration, uid, capturedView) && request === downloadRequest) feedback(el['download-feedback'], friendlyError(error), 'error');
   } finally {
@@ -1452,7 +1445,7 @@ try {
         'Chưa đồng bộ được trạng thái xác minh. Ứng dụng sẽ tự thử lại khi có kết nối.', 'neutral');
     },
   });
-  ({ uploadFile, listFiles, downloadFile, previewFile, removeFile, trashFile, restoreFile, getShares, grantShare, revokeShare, listFolders, createFolder, updateFolder, deleteFolder, updateFile, createUploadQueue, downloadFileWithProgress } = files);
+  ({ uploadFile, listFiles, downloadFile, previewFile, removeFile, trashFile, restoreFile, getShares, grantShare, revokeShare, listFolders, createFolder, updateFolder, deleteFolder, updateFile, createUploadQueue } = files);
   const mode = String(config.mode || 'firebase');
   cloudMode = mode === 'cloud';
   el['environment-label'].textContent = /emulator/i.test(mode) ? 'Firebase Emulator · Cục bộ' : 'Firebase · Trực tiếp';

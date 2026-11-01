@@ -367,6 +367,7 @@ class FileService:
     def list_trash(self, uid, page_token=None, *, q="", file_type="all", sort="name"):
         return self._list_owned(uid, page_token, trashed=True, q=q, file_type=file_type, sort=sort)
 
+    #Upload dữ liệu lưu vào firebase storage
     def upload(self, uid, data: bytes, original_name: str, content_type: str, folder_id=None):
         prefix = self._prefix(uid)
         name = safe_file_name(original_name)

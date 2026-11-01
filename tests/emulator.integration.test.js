@@ -134,6 +134,15 @@ test('private files and enforced quotas through FastAPI and real local emulators
     assert.match(response.headers.get('content-disposition'), /attachment/); assert.equal(response.headers.get('cache-control'), 'no-store');
     assert.deepEqual(new Uint8Array(await response.arrayBuffer()), PNG);
     assert.equal((await api(b, path)).status, 404); assert.equal((await api(guest, path)).status, 401);
+    const nativePath = `${base}/api/files/${encodeURIComponent(file.name)}/download`;
+    const native = token => fetch(nativePath, { method: 'POST', body: new URLSearchParams({ idToken: token }) });
+    const attachment = await native(await a.auth.currentUser.getIdToken());
+    assert.equal(attachment.status, 200);
+    assert.match(attachment.headers.get('content-disposition'), /^attachment;/);
+    assert.equal(attachment.headers.get('content-length'), String(PNG.length));
+    assert.deepEqual(new Uint8Array(await attachment.arrayBuffer()), PNG);
+    assert.equal((await native(await b.auth.currentUser.getIdToken())).status, 404);
+    assert.equal((await native('')).status, 401);
     assert.equal((await api(b, `/api/files/${encodeURIComponent(file.name)}`, { method: 'DELETE' })).status, 404);
     assert.equal((await fetch(`http://127.0.0.1:9199/v0/b/${BUCKET}/o/${encodeURIComponent(file.fullPath)}?alt=media`)).status, 403);
   });
@@ -169,6 +178,10 @@ test('private files and enforced quotas through FastAPI and real local emulators
     assert.equal(shared.usage.usedBytes, 0);
     const download = await api(b, sharedPath); assert.equal(download.status, 200);
     assert.deepEqual(new Uint8Array(await download.arrayBuffer()), PDF);
+    const nativeShared = () => fetch(`${base}${sharedPath.replace(/\/content$/, '/download')}`, { method: 'POST', body: new URLSearchParams({ idToken: b.auth.currentUser.accessToken }) });
+    const sharedAttachment = await nativeShared();
+    assert.equal(sharedAttachment.status, 200);
+    assert.deepEqual(new Uint8Array(await sharedAttachment.arrayBuffer()), PDF);
     assert.equal((await api(c, sharedPath)).status, 404); assert.equal((await api(guest, sharedPath)).status, 401);
     for (const [method, suffix, body] of [
       ['GET', '/shares'], ['POST', '/shares', { email: c.auth.currentUser.email }],
@@ -180,6 +193,7 @@ test('private files and enforced quotas through FastAPI and real local emulators
     }
     assert.equal((await api(a, `${path}/shares/${b.auth.currentUser.uid}`, { method: 'DELETE' })).status, 204);
     assert.equal((await api(b, sharedPath)).status, 404);
+    assert.equal((await nativeShared()).status, 404, 'Native download must recheck revoked grants');
     assert.equal((await (await api(b, '/api/files/shared-with-me')).json()).files.length, 0);
     assert.equal((await grant(b.auth.currentUser.email)).status, 201);
     const before = (await (await api(a, '/api/files')).json()).usage;

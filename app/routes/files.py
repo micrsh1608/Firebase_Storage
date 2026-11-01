@@ -11,7 +11,7 @@ from starlette.concurrency import run_in_threadpool
 from starlette.requests import ClientDisconnect
 
 from app.file_service import ALLOWED_TYPES, MAX_FILE_BYTES, FileService, ServiceError
-from app.routes.auth_demo import verified_user
+from app.routes.auth_demo import download_user, verified_user
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/files", tags=["Private files"])
@@ -140,6 +140,11 @@ def shared_preview(owner_uid: str, name: str, request: Request, claims: dict = D
     return _download_response(_call(get_file_service(request).shared_content, claims["uid"], owner_uid, name), preview=True)
 
 
+@router.post("/shared/{owner_uid}/{name}/download")
+def shared_download(owner_uid: str, name: str, request: Request, claims: dict = Depends(download_user)):
+    return _download_response(_call(get_file_service(request).shared_content, claims["uid"], owner_uid, name))
+
+
 @router.put("", status_code=201)
 async def upload_file(request: Request, name: str = Query(..., min_length=1, max_length=1024),
                       folderId: str | None = Query(None, max_length=128),
@@ -171,6 +176,7 @@ async def upload_file(request: Request, name: str = Query(..., min_length=1, max
             raise HTTPException(400, "Kết nối tải lên đã bị ngắt. Vui lòng thử lại.") from None
         payload = body.getvalue()
     service = await run_in_threadpool(get_file_service, request)
+    #backend quyết định file thuộc ai
     return await run_in_threadpool(_call, service.upload, claims["uid"], payload, name, content_type, folderId)
 
 
@@ -184,6 +190,11 @@ def download_file(name: str, request: Request, claims: dict = Depends(verified_u
 @router.get("/{name}/preview")
 def preview_file(name: str, request: Request, claims: dict = Depends(verified_user)):
     return _download_response(_call(get_file_service(request).content, claims["uid"], name), preview=True)
+
+
+@router.post("/{name}/download")
+def browser_download(name: str, request: Request, claims: dict = Depends(download_user)):
+    return _download_response(_call(get_file_service(request).content, claims["uid"], name))
 
 
 @router.patch("/{name}")

@@ -1,5 +1,6 @@
 import { getCurrentUser } from "./auth.js";
 import { validateFile, assertOwnedPath } from "./file-policy.js";
+import { submitBrowserDownload } from "./browser-download.js";
 
 function failure(message, code = "") {
   return Object.assign(new Error(message), { code });
@@ -64,6 +65,7 @@ export function uploadFile(file, onProgress = () => {}, folderId = null) {
         xhr = new XMLHttpRequest();
         const uploadQuery = new URLSearchParams({ name: file.name });
         if (folderId) uploadQuery.set("folderId", folderId);
+        //Gửi nguyên file tới backend
         xhr.open("PUT", "/api/files?" + uploadQuery);
         xhr.timeout = 120000;
         xhr.setRequestHeader("Authorization", `Bearer ${token}`);
@@ -142,7 +144,7 @@ export async function listFiles(pageToken, view = "own", filters = {}) {
   return body;
 }
 
-async function fetchFileBlob(fullPath, ownerUid = null, action = 'content') {
+function contentEndpoint(fullPath, ownerUid, action) {
   let endpoint;
   if (ownerUid) {
     if (!/^[A-Za-z0-9_-]{1,128}$/.test(ownerUid)) throw failure("Chủ sở hữu tài liệu không hợp lệ.");
@@ -152,15 +154,27 @@ async function fetchFileBlob(fullPath, ownerUid = null, action = 'content') {
   } else {
     endpoint = fileEndpoint(fullPath) + "/" + action;
   }
-  const { response, user } = await request(endpoint);
+  return endpoint;
+}
+
+async function fetchFileBlob(fullPath, ownerUid = null, action = 'preview') {
+  const { response, user } = await request(contentEndpoint(fullPath, ownerUid, action));
   const blob = await response.blob();
   checkSession(user);
   return blob;
 }
 
 
-export async function downloadFile(fullPath, ownerUid = null) {
-  return fetchFileBlob(fullPath, ownerUid, "content");
+export async function downloadFile(fullPath, ownerUid = null, { shouldStart = () => true, onError = () => {} } = {}) {
+  const user = currentUser();
+  const endpoint = contentEndpoint(fullPath, ownerUid, "download");
+  const token = await user.getIdToken();
+  checkSession(user);
+  if (!shouldStart()) return false;
+  submitBrowserDownload(endpoint, token, body => {
+    if (getCurrentUser() === user && shouldStart()) onError(responseError(0, body));
+  });
+  return true;
 }
 
 export async function previewFile(fullPath, ownerUid = null) {
@@ -379,64 +393,8 @@ export function createUploadQueue(files, onUpdate = () => {}, folderId = null) {
   };
 }
 
-// ──────────────────────────────────────────────────────────────────────────────
-// Giai đoạn 3: Tải xuống file lớn với Streaming + progress
-// ──────────────────────────────────────────────────────────────────────────────
-
-/**
- * Tải xuống file với Streaming Response và báo cáo tiến độ theo byte.
- * Nếu server không cung cấp Content-Length, onProgress sẽ không được gọi.
- * @param {string} fullPath - đường dẫn đầy đủ trong Storage
- * @param {string|null} ownerUid - UID chủ sở hữu (nếu file được chia sẻ)
- * @param {function} onProgress - callback(percent: number 0–100)
- */
-export async function downloadFileWithProgress(fullPath, ownerUid = null, onProgress = () => {}) {
-  const user = currentUser();
-  let endpoint;
-  if (ownerUid) {
-    if (!/^[A-Za-z0-9_-]{1,128}$/.test(ownerUid)) throw failure("Chủ sở hữu tài liệu không hợp lệ.");
-    const name = fullPath.slice(("users/" + ownerUid + "/").length);
-    endpoint = "/api/files/shared/" + encodeURIComponent(ownerUid) + "/" + encodeURIComponent(name) + "/content";
-  } else {
-    endpoint = fileEndpoint(fullPath) + "/content";
-  }
-
-  const token = await user.getIdToken();
-  checkSession(user);
-
-  const res = await fetch(endpoint, {
-    cache: "no-store", redirect: "error",
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  checkSession(user);
-
-  if (!res.ok) {
-    let body;
-    try { body = await res.json(); } catch { /* ignore */ }
-    throw responseError(res.status, body);
-  }
-
-  // Nếu browser không hỗ trợ streaming, fallback về blob()
-  if (!res.body) return res.blob();
-
-  const contentLength = res.headers.get("Content-Length");
-  const totalBytes = contentLength ? parseInt(contentLength, 10) : 0;
-  const contentType = (res.headers.get("Content-Type") || "application/octet-stream").split(";")[0].trim();
-
-  const reader = res.body.getReader();
-  const chunks = [];
-  let received = 0;
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    chunks.push(value);
-    received += value.length;
-    if (totalBytes > 0) {
-      onProgress(Math.min(100, Math.round(received / totalBytes * 100)));
-    }
-    checkSession(user);
-  }
-
-  return new Blob(chunks, { type: contentType });
+// Compatibility entry point: native browser downloads manage their own progress.
+// No file bytes are buffered into a Blob in JavaScript.
+export async function downloadFileWithProgress(fullPath, ownerUid = null) {
+  return downloadFile(fullPath, ownerUid);
 }
