@@ -89,6 +89,11 @@ Trang chỉ kiểm tra API của TV1 nằm tại **http://127.0.0.1:8000/setup**
 
 ## 6. Chạy bằng Firebase Emulator (không cần Blaze)
 
+Khuyến nghị: sau khi cài Python dependencies, Node.js 24.12+ và JDK 21+,
+chạy `npm ci` rồi `npm run dev:emulator`. Lệnh này chạy cả Firebase Emulator và
+API, không cần thay `.env` cloud. Mở http://127.0.0.1:8000.
+Xem [hướng dẫn đầy đủ](emulator.md). Phương án sửa `.env` thủ công bên dưới vẫn dùng được.
+
 Tạo `.env` dạng:
 
 ```dotenv

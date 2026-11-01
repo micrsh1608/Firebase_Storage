@@ -9,6 +9,8 @@
   "scripts": {
     "vendor:pdf": "node scripts/vendor-pdfjs.mjs",
     "emulators": "firebase emulators:start --only auth,storage --project demo-firebase-storage",
+    "dev:emulator": "python scripts/run_emulator.py",
+    "api:emulator": "python scripts/run_emulator.py --api-only",
     "test": "node --test tests/file-policy.test.js tests/ui-contract.test.js tests/verification-sync.test.js",
     "test:policy": "node --test tests/file-policy.test.js",
     "test:integration": "node --test --test-concurrency=1 tests/emulator.integration.test.js",
